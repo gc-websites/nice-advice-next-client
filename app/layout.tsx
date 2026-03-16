@@ -114,43 +114,9 @@ export default async function RootLayout({
       </head>
       <body className={`antialiased ${merriweather.variable} ${poppins.variable}`}>
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-9W0Q698989"
-          strategy="lazyOnload"
-        />
-        <Script id="google-analytics" strategy="lazyOnload">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-9W0Q698989');
-          `}
-        </Script>
-        <Script id="google-tag-manager" strategy="lazyOnload">
-          {`
-            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-NZS7G3BL');
-          `}
-        </Script>
-        <Script
           src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"
           strategy="lazyOnload"
         />
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1088654265590051"
-          strategy="lazyOnload"
-          crossOrigin="anonymous"
-        />
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-NZS7G3BL"
-            height="0"
-            width="0"
-            style={{ display: 'none', visibility: 'hidden' }}
-          />
-        </noscript>
 
         <Layout categories={categories}>
           {children}
