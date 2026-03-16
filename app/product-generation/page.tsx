@@ -1,0 +1,75 @@
+'use client';
+import { useState } from 'react';
+
+const ProductGeneration = () => {
+  const [prompt, setPrompt] = useState('');
+  const [link, setLink] = useState('');
+  const [country, setCountry] = useState('USA');
+  const [postId, setPostId] = useState('');
+  const [status, setStatus] = useState('');
+
+  const handleChangePrompt = (value: any) => setPrompt(value);
+  const handleChangeLink = (value: any) => setLink(value);
+  const handleChangeCountry = (value: any) => setCountry(value);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setPostId('');
+    setStatus('Creating link...');
+    const res = await fetch('https://dev.nice-advice.info/generate-product', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: prompt, link: link, country: country }),
+    });
+    const data = await res.json();
+    setPostId(data.id);
+    setStatus('Link created successfully.');
+    setLink('');
+    setPrompt('');
+    setCountry('USA');
+  };
+
+  return (
+    <div className="flex flex-col justify-center items-center mt-5 mb-12">
+      <h1 className="text-3xl p-5">Product Generation</h1>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col justify-center items-center gap-3"
+      >
+        <input
+          type="text"
+          name="prompt"
+          placeholder="Prompt"
+          minLength={3}
+          value={prompt}
+          onChange={event => handleChangePrompt(event.target.value)}
+          className="p-2 border rounded w-[90vw] md:w-[50vw] bg-gray-500 dark:bg-gray-600"
+        />
+        <input
+          type="text"
+          name="link"
+          placeholder="Amazon link"
+          minLength={3}
+          value={link}
+          onChange={event => handleChangeLink(event.target.value)}
+          className="p-2 border rounded w-[90vw] md:w-[50vw] bg-gray-500 dark:bg-gray-600"
+        />
+        <select
+          value={country}
+          onChange={event => handleChangeCountry(event.target.value)}
+          className="p-2 border rounded w-[90vw] md:w-[50vw] bg-gray-500 dark:bg-gray-600"
+        >
+          <option value="USA">USA</option>
+          <option value="Canada">Canada</option>
+        </select>
+        <button className="w-[50vw] md:w-[30vw] bg-green-600 rounded p-2">
+          GENERATE
+        </button>
+      </form>
+      {status && <p>{status}</p>}
+      {postId && <p>https://nice-advice.info/product/{postId}</p>}
+    </div>
+  );
+};
+
+export default ProductGeneration;
