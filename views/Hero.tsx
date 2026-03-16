@@ -76,6 +76,7 @@ const Hero = () => {
                   src={popularPosts[0].image.url}
                   alt={popularPosts[0].title}
                   fill
+                  priority
                   sizes="(max-width: 768px) 100vw, 70vw"
                   className="object-cover object-center transform group-hover:scale-105 transition duration-300"
                 />
