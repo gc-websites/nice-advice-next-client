@@ -1,102 +1,116 @@
-import axios from 'axios';
-
 const BASE_URL = 'https://vivid-triumph-4386b82e17.strapiapp.com/api';
 // const BASE_URL = 'http://localhost:1337/api';
 
-const apiData = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true,
-});
+const DEFAULT_CACHE = { next: { revalidate: 60 } };
 
 export const getProtectedPassword = async () => {
-  const res = await apiData.get('/protected-page');
-  return res.data?.data?.password || null;
+  try {
+    const res = await fetch(`${BASE_URL}/protected-page`, DEFAULT_CACHE);
+    if (!res.ok) throw new Error('Failed to fetch protected password');
+    const data = await res.json();
+    return data?.data?.password || null;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
 
 export const getCategories = async () => {
-  const categories = await apiData.get(
-    '/categories?populate[image][populate]=*',
-  );
-  return categories.data;
+  const res = await fetch(`${BASE_URL}/categories?populate[image][populate]=*`, DEFAULT_CACHE);
+  if (!res.ok) throw new Error('Failed to fetch categories');
+  return res.json();
 };
 
 export const getPopularPosts = async () => {
-  const res = await apiData.get(
-    '/posts?populate[category][populate]=*&populate[author][populate]=*&populate[image][populate]=*&sort=createdAt:desc&pagination[page]=1&pagination[pageSize]=5',
+  const res = await fetch(
+    `${BASE_URL}/posts?populate[category][populate]=*&populate[author][populate]=*&populate[image][populate]=*&sort=createdAt:desc&pagination[page]=1&pagination[pageSize]=5`,
+    DEFAULT_CACHE
   );
-
-  return res.data; // возвращаем объект целиком
+  if (!res.ok) throw new Error('Failed to fetch popular posts');
+  return res.json();
 };
 
-export const getPost = async documentId => {
-  const post = await apiData.get(
-    `/posts/${documentId}?populate[paragraphs][populate]=*&populate[category][populate]=*&populate[image][populate]=*&populate[ads][populate]=*&populate[firstAdBanner][populate]=*&populate[secondAdBanner][populate]=*&populate[author][populate]=*`,
+export const getPost = async (documentId: string) => {
+  const res = await fetch(
+    `${BASE_URL}/posts/${documentId}?populate[paragraphs][populate]=*&populate[category][populate]=*&populate[image][populate]=*&populate[ads][populate]=*&populate[firstAdBanner][populate]=*&populate[secondAdBanner][populate]=*&populate[author][populate]=*`,
+    DEFAULT_CACHE
   );
-  return post.data;
+  if (!res.ok) throw new Error(`Failed to fetch post ${documentId}`);
+  return res.json();
 };
 
 export const getRelatedPosts = async () => {
-  const relatedPosts = await apiData.get(
-    '/posts?populate[category][populate]=*&populate[author][populate]=*&populate[image][populate]=*&filters[isPopular][$eq]=true&pagination[page]=1&pagination[pageSize]=4',
+  const res = await fetch(
+    `${BASE_URL}/posts?populate[category][populate]=*&populate[author][populate]=*&populate[image][populate]=*&filters[isPopular][$eq]=true&pagination[page]=1&pagination[pageSize]=4`,
+    DEFAULT_CACHE
   );
-  return relatedPosts.data;
+  if (!res.ok) throw new Error('Failed to fetch related posts');
+  return res.json();
 };
 
-export const getCategory = async documentId => {
-  const category = await apiData.get(
-    `/categories/${documentId}?populate[image][populate]=*`,
-  );
-  return category.data;
+export const getCategory = async (documentId: string) => {
+  const res = await fetch(`${BASE_URL}/categories/${documentId}?populate[image][populate]=*`, DEFAULT_CACHE);
+  if (!res.ok) throw new Error('Failed to fetch category');
+  return res.json();
 };
 
 export const getPostsByCategory = async (
-  categoryDocumentId,
+  categoryDocumentId: string,
   page = 1,
-  pageSize = 10,
+  pageSize = 10
 ) => {
-  const posts = await apiData.get(
-    `/posts?filters[category][documentId][$eq]=${categoryDocumentId}&sort[0]=createdAt:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+  const res = await fetch(
+    `${BASE_URL}/posts?filters[category][documentId][$eq]=${categoryDocumentId}&sort[0]=createdAt:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+    DEFAULT_CACHE
   );
-  return posts.data;
+  if (!res.ok) throw new Error('Failed to fetch posts by category');
+  return res.json();
 };
 
-export const getAuthor = async authorDocumentId => {
-  const author = await apiData.get(
-    `/authors/${authorDocumentId}?populate[avatar][populate]=*`,
-  );
-  return author.data;
+export const getAuthor = async (authorDocumentId: string) => {
+  const res = await fetch(`${BASE_URL}/authors/${authorDocumentId}?populate[avatar][populate]=*`, DEFAULT_CACHE);
+  if (!res.ok) throw new Error('Failed to fetch author');
+  return res.json();
 };
 
 export const getPostsByAuthor = async (
-  authorDocumentId,
+  authorDocumentId: string,
   page = 1,
-  pageSize = 10,
+  pageSize = 10
 ) => {
-  const posts = await apiData.get(
-    `/posts?filters[author][documentId][$eq]=${authorDocumentId}&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+  const res = await fetch(
+    `${BASE_URL}/posts?filters[author][documentId][$eq]=${authorDocumentId}&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+    DEFAULT_CACHE
   );
-  return posts.data;
+  if (!res.ok) throw new Error('Failed to fetch posts by author');
+  return res.json();
 };
 
-export const getSearchedPosts = async (query, page = 1, pageSize = 10) => {
-  const posts = await apiData.get(
-    `/posts?filters[title][$containsi]=${query}&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+export const getSearchedPosts = async (query: string, page = 1, pageSize = 10) => {
+  const res = await fetch(
+    `${BASE_URL}/posts?filters[title][$containsi]=${query}&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+    DEFAULT_CACHE
   );
-  return posts.data;
+  if (!res.ok) throw new Error('Failed to fetch searched posts');
+  return res.json();
 };
 
 export const getNewPosts = async (page = 1, pageSize = 10) => {
-  const posts = await apiData.get(
-    `/posts?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+  const res = await fetch(
+    `${BASE_URL}/posts?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+    DEFAULT_CACHE
   );
-  return posts.data;
+  if (!res.ok) throw new Error('Failed to fetch new posts');
+  return res.json();
 };
 
-export const signUpForNewsletter = async email => {
-  const response = await apiData.post('/newsletters', {
-    data: {
-      email: email,
-    },
+export const signUpForNewsletter = async (email: string) => {
+  // Post requests shouldn't be cached
+  const res = await fetch(`${BASE_URL}/newsletters`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: { email: email } }),
   });
-  return response.data;
+  if (!res.ok) throw new Error('Failed to sign up for newsletter');
+  return res.json();
 };
