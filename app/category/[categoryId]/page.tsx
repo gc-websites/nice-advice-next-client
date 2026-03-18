@@ -1,122 +1,101 @@
-'use client';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import Image from 'next/image';
 import {
   getCategory,
   getPostsByCategory,
   getRelatedPosts,
 } from '@/services/postsAPI';
-import { useEffect, useState } from 'react';
-
-import Loader from '@/components/Loader';
-import { notFound } from 'next/navigation'; // Assuming Page404 was moved to views or components
+import { notFound } from 'next/navigation';
 import Pagination from '@/components/Pagination';
 import Disclaimer from '@/views/Disclaimer';
 import RenderDescription from '@/components/RenderDescription';
-import { io } from 'socket.io-client';
+import { SocketProvider } from '@/components/SocketProvider';
+import LiveViewerCount from '@/components/LiveViewerCount';
 
-const socket = io('https://vivid-triumph-4386b82e17.strapiapp.com');
-
-export default function Category() {
-  const [category, setCategory] = useState<any>({});
-  const [relatedPosts, setRelatedPosts] = useState([]);
-  const [posts, setPosts] = useState<any[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageCount, setPageCount] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const params = useParams();
-  const categoryId = params.categoryId as string;
+export default async function Category({
+  params,
+  searchParams,
+}: {
+  params: { categoryId: string };
+  searchParams: { page?: string };
+}) {
+  const { categoryId } = await params;
+  const { page } = await searchParams;
+  const currentPage = Number(page) || 1;
   const pageSize = 10;
 
-  const [activeUsers, setActiveUsers] = useState<any>({});
+  let categoryData;
+  let postsData;
+  let relatedPosts = [];
 
-  useEffect(() => {
-    socket.on('updateAllActiveUsers', data => {
-      setActiveUsers(data);
-    });
-    socket.on('updateActiveUsers', ({ postId, count }) => {
-      setActiveUsers((prev: any) => ({
-        ...prev,
-        [postId]: count,
-      }));
-    });
-
-    return () => {
-      socket.off('updateAllActiveUsers');
-      socket.off('updateActiveUsers');
-    };
-  }, [categoryId]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const categoryData = await getCategory(categoryId);
-        const postsData = await getPostsByCategory(
-          categoryId,
-          currentPage,
-          pageSize,
-        );
-        const related = await getRelatedPosts();
-        setCategory(categoryData.data);
-        setRelatedPosts(related.data);
-        setPosts(postsData.data.reverse());
-        setPageCount(postsData.meta.pagination.pageCount);
-        window.scrollTo(0, 0);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    if (categoryId) fetchData();
-  }, [categoryId, currentPage]);
-
-  if (isLoading) {
-    return <Loader />;
+  try {
+    const [categoryRes, postsRes, relatedRes] = await Promise.all([
+      getCategory(categoryId),
+      getPostsByCategory(categoryId, currentPage, pageSize),
+      getRelatedPosts()
+    ]);
+    
+    categoryData = categoryRes.data;
+    postsData = postsRes;
+    relatedPosts = relatedRes.data || [];
+  } catch (error) {
+    console.error('Error fetching category data:', error);
   }
 
-  if (!category || Object.keys(category).length === 0) {
+  if (!categoryData || Object.keys(categoryData).length === 0) {
     notFound();
   }
 
-  const getReadingCount = (postId: string) => activeUsers[postId] || 0;
+  // Next.js reverses arrays in memory during render, but it's better to sort in Strapi. 
+  // We'll reverse here to maintain existing behavior for now.
+  const posts = postsData?.data?.reverse() || [];
+  const pageCount = postsData?.meta?.pagination?.pageCount || 1;
 
   return (
-    <div>
+    <SocketProvider>
       <section className="container mx-auto py-8">
         <div>
           <div>
             <div className="relative vignette-container">
-              <img
-                src={category.image?.url}
-                alt={category.name}
-                className="w-full object-cover object-center rounded max-h-96 mb-6"
-              />
-              <div className="absolute bottom-0 left-0 w-full bg-black/50 p-4 z-40 rounded">
+              {categoryData.image?.url && (
+                <div className="w-full relative h-64 md:h-96 mb-6">
+                  <Image
+                    src={categoryData.image.url}
+                    alt={categoryData.name}
+                    fill
+                    priority
+                    sizes="(max-width: 1200px) 100vw, 1200px"
+                    className="object-cover object-center rounded"
+                  />
+                </div>
+              )}
+              <div className="absolute bottom-6 left-0 w-full bg-black/50 p-4 z-40 rounded">
                 <h2 className="section__title text-white md:text-4xl text-xl font-bold text-left">
-                  {category.name}
+                  {categoryData.name}
                 </h2>
               </div>
             </div>
 
             <div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 h-full">
-                {posts?.map(post => (
+                {posts?.map((post: any) => (
                   <Link
                     key={post.documentId}
                     href={`/post/${post.documentId}`}
                     className="group p-4 hover:shadow-lg rounded-lg bg-white dark:bg-additionalText transition duration-300 flex flex-col"
                   >
-                    <div className="w-full aspect-[4/3] overflow-hidden rounded-lg">
-                      <img
-                        src={post.image?.url}
-                        alt={post.title}
-                        className="w-full h-full object-cover object-center transform group-hover:scale-105 transition duration-300"
-                      />
+                    <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
+                      {post.image?.url && (
+                        <Image
+                          src={post.image.url}
+                          alt={post.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="object-cover object-center transform group-hover:scale-105 transition duration-300"
+                        />
+                      )}
                     </div>
-                    <div className="mt-3 flex flex-col gap-4">
+                    <div className="mt-3 flex flex-col gap-4 flex-grow">
                       <h3 className="section__title text-2xl md:text-3xl text-mainText dark:text-white">
                         {post.title}
                       </h3>
@@ -125,23 +104,29 @@ export default function Category() {
                         className="section__description text-base"
                         truncate={true}
                       />
-                      <p className="section__description text-main dark:text-main text-base">
-                        Read more
-                      </p>
+                      <div className="flex justify-between items-center mt-auto">
+                        <p className="section__description text-main dark:text-main text-base">
+                          Read more
+                        </p>
+                        <LiveViewerCount documentId={post.documentId} />
+                      </div>
                     </div>
                   </Link>
                 ))}
               </div>
             </div>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={pageCount}
-              onPageChange={setCurrentPage}
-            />
+            
+            {pageCount > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={pageCount}
+                basePath={`/category/${categoryId}`}
+              />
+            )}
           </div>
         </div>
       </section>
       <Disclaimer />
-    </div>
+    </SocketProvider>
   );
 }

@@ -10,7 +10,6 @@ import Disclaimer from '@/views/Disclaimer';
 import RenderDescription from '@/components/RenderDescription';
 // import AdList from '@/components/AdList';
 import InfinitePost from '@/components/InfinitePost';
-import EmailPaywall from '@/components/EmailPaywall';
 import LiveViewerCount from '@/components/LiveViewerCount';
 import { SocketProvider } from '@/components/SocketProvider';
 
@@ -99,34 +98,32 @@ export default async function Post({ params }: { params: { postId: string } }) {
                 truncate={false}
               />
 
-              {post.paragraphs && post.paragraphs[0] && (
-                <div className="pt-6 flex flex-col gap-4">
-                  <h3 className="section__title text-2xl text-mainText dark:text-white">
-                    {post.paragraphs[0].subtitle}
-                  </h3>
+              {post.paragraphs && post.paragraphs.map(
+                ({ id, subtitle, description, image, ads }) => (
+                  <div key={id} className="pt-6 flex flex-col gap-4 relative">
+                    <h3 className="section__title text-2xl text-mainText dark:text-white">
+                      {subtitle}
+                    </h3>
 
-                  <RenderDescription
-                    description={post.paragraphs[0].description}
-                    className="section__description text-base"
-                    truncate={false}
-                  />
+                    <RenderDescription
+                      description={description}
+                      className="section__description text-base"
+                      truncate={false}
+                    />
 
-                  {post.paragraphs[0].image?.url && (
-                    <div className="w-full relative aspect-[4/3]">
-                      <Image
-                        src={post.paragraphs[0].image.url}
-                        alt={post.paragraphs[0].subtitle}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 70vw"
-                        className="object-cover rounded"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {post.paragraphs && post.paragraphs[1] && (
-                <EmailPaywall paragraphs={post.paragraphs} />
+                    {image?.url && (
+                      <div className="w-full relative aspect-[4/3]">
+                        <Image
+                          src={image.url}
+                          alt={subtitle || 'Post image'}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 70vw"
+                          className="object-cover rounded"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )
               )}
             </div>
           </div>

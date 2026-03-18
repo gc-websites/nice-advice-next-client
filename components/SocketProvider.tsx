@@ -11,7 +11,7 @@ const SocketContext = createContext<SocketContextData>({ socket: null, activeUse
 
 export const useSocket = () => useContext(SocketContext);
 
-export const SocketProvider = ({ children, initialPostId }: { children: ReactNode, initialPostId: string }) => {
+export const SocketProvider = ({ children, initialPostId }: { children: ReactNode, initialPostId?: string }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [activeUsers, setActiveUsers] = useState<Record<string, number>>({});
 

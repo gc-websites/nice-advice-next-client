@@ -1,4 +1,37 @@
-const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+'use client';
+import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
+
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  basePath?: string;
+  onPageChange?: (page: number) => void;
+}
+
+const Pagination = ({ currentPage, totalPages, basePath, onPageChange }: PaginationProps) => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  
+  // Calculate the base path dynamically if not provided
+  const path = basePath || pathname;
+  
+  const createPageURL = (pageNumber: number | string) => {
+    // Fallback to client handler if provided
+    if (onPageChange) return '#';
+    
+    const params = new URLSearchParams(searchParams);
+    params.set('page', pageNumber.toString());
+    return `${path}?${params.toString()}`;
+  };
+
+  const handlePageClick = (e: React.MouseEvent, pageNumber: number) => {
+    if (onPageChange) {
+      e.preventDefault();
+      onPageChange(pageNumber);
+    }
+  };
+
   const pageNumbers = [];
   const maxPageNumbers = 5;
   const halfPageNumbers = Math.floor(maxPageNumbers / 2);
@@ -16,31 +49,36 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 
   return (
     <div className="flex justify-center mt-8 space-x-2">
-      <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="font-inter px-3 py-1 border rounded disabled:opacity-50 transition-colors"
+      <Link
+        href={createPageURL(currentPage - 1)}
+        onClick={(e) => handlePageClick(e, currentPage - 1)}
+        className={`font-inter px-3 py-1 border rounded transition-colors ${
+          currentPage === 1 ? 'opacity-50 pointer-events-none' : ''
+        }`}
       >
         &larr; <span className="hidden md:inline-block">Prev</span>
-      </button>
+      </Link>
       {pageNumbers.map(number => (
-        <button
+        <Link
           key={number}
-          onClick={() => onPageChange(number)}
+          href={createPageURL(number)}
+          onClick={(e) => handlePageClick(e, number)}
           className={`font-inter px-3 py-1 border rounded transition-colors ${
             number === currentPage ? 'bg-main2 text-white' : ''
           }`}
         >
           {number}
-        </button>
+        </Link>
       ))}
-      <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="font-inter px-3 py-1 border rounded disabled:opacity-50 transition-colors"
+      <Link
+        href={createPageURL(currentPage + 1)}
+        onClick={(e) => handlePageClick(e, currentPage + 1)}
+        className={`font-inter px-3 py-1 border rounded transition-colors ${
+          currentPage === totalPages ? 'opacity-50 pointer-events-none' : ''
+        }`}
       >
         <span className="hidden md:inline-block">Next</span> &rarr;
-      </button>
+      </Link>
     </div>
   );
 };
