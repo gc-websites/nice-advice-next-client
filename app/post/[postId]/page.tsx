@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getNewPosts, getPost, getRelatedPosts } from '@/services/postsAPI';
 
-import dot from '@/assets/svg/dot.svg';
+import dot from '@/public/assets/svg/dot.svg';
 
 import Loader from '@/components/Loader';
 import { notFound } from 'next/navigation';
@@ -22,10 +22,10 @@ export default function Post() {
   const [post, setPost] = useState<any>({});
   const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const params = useParams();
   const postId = params.postId as string;
-  
+
   const [postIds, setPostIds] = useState<any[]>([]);
   const [activeUsers, setActiveUsers] = useState<any>({});
 

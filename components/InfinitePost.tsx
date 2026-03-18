@@ -4,7 +4,7 @@ import { getPost, getRelatedPosts } from '../services/postsAPI';
 import Link from 'next/link';
 
 import Image from 'next/image';
-import dot from '../assets/svg/dot.svg';
+import dot from '@/public/assets/svg/dot.svg';
 
 import Loader from '../components/Loader';
 import RenderDescription from '../components/RenderDescription';
