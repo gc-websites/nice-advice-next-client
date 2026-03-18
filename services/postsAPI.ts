@@ -60,7 +60,7 @@ export const getPostsByCategory = async (
   pageSize = 10
 ) => {
   const res = await fetch(
-    `${BASE_URL}/posts?filters[category][documentId][$eq]=${categoryDocumentId}&sort[0]=createdAt:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+    `${BASE_URL}/posts?filters[category][documentId][$eq]=${categoryDocumentId}&sort[0]=createdAt:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate[category][populate]=image&populate[author][populate]=avatar&populate[image][populate]=*`,
     DEFAULT_CACHE
   );
   if (!res.ok) throw new Error('Failed to fetch posts by category');
@@ -79,7 +79,7 @@ export const getPostsByAuthor = async (
   pageSize = 10
 ) => {
   const res = await fetch(
-    `${BASE_URL}/posts?filters[author][documentId][$eq]=${authorDocumentId}&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+    `${BASE_URL}/posts?filters[author][documentId][$eq]=${authorDocumentId}&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate[category][populate]=image&populate[author][populate]=avatar&populate[image][populate]=*`,
     DEFAULT_CACHE
   );
   if (!res.ok) throw new Error('Failed to fetch posts by author');
@@ -88,7 +88,7 @@ export const getPostsByAuthor = async (
 
 export const getSearchedPosts = async (query: string, page = 1, pageSize = 10) => {
   const res = await fetch(
-    `${BASE_URL}/posts?filters[title][$containsi]=${query}&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+    `${BASE_URL}/posts?filters[title][$containsi]=${query}&pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate[category][populate]=image&populate[author][populate]=avatar&populate[image][populate]=*`,
     DEFAULT_CACHE
   );
   if (!res.ok) throw new Error('Failed to fetch searched posts');
@@ -97,7 +97,7 @@ export const getSearchedPosts = async (query: string, page = 1, pageSize = 10) =
 
 export const getNewPosts = async (page = 1, pageSize = 10) => {
   const res = await fetch(
-    `${BASE_URL}/posts?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+    `${BASE_URL}/posts?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate[category][populate]=image&populate[author][populate]=avatar&populate[image][populate]=*&sort[0]=createdAt:desc`,
     DEFAULT_CACHE
   );
   if (!res.ok) throw new Error('Failed to fetch new posts');

@@ -1,5 +1,4 @@
 import { FC, FormEvent, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface EmailFormProps {
   handleFormClose: () => void;
@@ -8,9 +7,11 @@ interface EmailFormProps {
 const EmailForm: FC<EmailFormProps> = ({ handleFormClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Close on Escape key
   useEffect(() => {
+    setMounted(true);
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleFormClose();
     };
@@ -32,23 +33,16 @@ const EmailForm: FC<EmailFormProps> = ({ handleFormClose }) => {
   };
 
   return (
-    <AnimatePresence>
+    <>
       {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm sm:p-6 transition-opacity duration-300 ${mounted ? 'opacity-100' : 'opacity-0'}`}
         onClick={handleFormClose}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm sm:p-6"
       >
         {/* Modal Container */}
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        <div
           onClick={e => e.stopPropagation()} // Prevent closing when clicking inside
-          className="relative w-full max-w-lg overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-white/20 dark:border-gray-700 shadow-2xl rounded-2xl md:rounded-3xl"
+          className={`relative w-full max-w-lg overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-white/20 dark:border-gray-700 shadow-2xl rounded-2xl md:rounded-3xl transition-all duration-300 transform ${mounted ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-4 opacity-0'}`}
         >
           {/* Close Button Cross */}
           <button
@@ -85,10 +79,8 @@ const EmailForm: FC<EmailFormProps> = ({ handleFormClose }) => {
             </div>
 
             {isSuccess ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center py-10"
+              <div
+                className="flex flex-col items-center justify-center py-10 animate-fade-in"
               >
                 <div className="w-16 h-16 bg-main2/10 text-main2 rounded-full flex flex-col items-center justify-center mb-4">
                   <svg
@@ -112,7 +104,7 @@ const EmailForm: FC<EmailFormProps> = ({ handleFormClose }) => {
                 <p className="text-gray-500 dark:text-gray-400 mt-2">
                   Thank you for reaching out.
                 </p>
-              </motion.div>
+              </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 {/* Form Fields */}
@@ -173,12 +165,10 @@ const EmailForm: FC<EmailFormProps> = ({ handleFormClose }) => {
                     Cancel
                   </button>
                   <div className="flex-1 w-full">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                    <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full h-full px-4 py-3 rounded-xl font-medium text-white bg-main2 hover:bg-main3 shadow-lg shadow-main2/30 transition-all focus:ring-2 focus:ring-main2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 outline-none flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="w-full h-full px-4 py-3 rounded-xl font-medium text-white bg-main2 hover:bg-main3 hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-main2/30 transition-all focus:ring-2 focus:ring-main2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 outline-none flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                     >
                       {isSubmitting ? (
                         <svg
@@ -204,15 +194,15 @@ const EmailForm: FC<EmailFormProps> = ({ handleFormClose }) => {
                       ) : (
                         'Send Message'
                       )}
-                    </motion.button>
+                    </button>
                   </div>
                 </div>
               </form>
             )}
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+      </div>
+    </>
   );
 };
 
