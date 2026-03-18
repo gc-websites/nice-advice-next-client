@@ -53,7 +53,6 @@ const Hero = ({ popularPosts }: HeroProps) => {
                   alt={popularPosts[0].title}
                   fill
                   priority
-                  unoptimized={true}
                   fetchPriority="high"
                   sizes="(max-width: 768px) 100vw, 70vw"
                   className="object-cover object-center transform group-hover:scale-105 transition duration-300"
