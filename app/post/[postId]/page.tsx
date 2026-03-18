@@ -80,7 +80,7 @@ export default async function Post({ params }: { params: { postId: string } }) {
             <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
               {post.image?.url && (
                 <Image
-                  src={post.image.url}
+                  src={post.image?.formats?.large?.url || post.image?.formats?.medium?.url || post.image.url}
                   alt={post.title}
                   fill
                   priority
@@ -137,7 +137,7 @@ export default async function Post({ params }: { params: { postId: string } }) {
               >
                 <div className="flex items-center pb-2 flex-wrap gap-3">
                   <Image
-                    src={rpost.author?.avatar?.url || '/fallback-avatar.png'}
+                    src={rpost.author?.avatar?.formats?.thumbnail?.url || rpost.author?.avatar?.url || '/fallback-avatar.png'}
                     alt={rpost.author?.name || 'Author'}
                     width={36}
                     height={36}
@@ -158,7 +158,7 @@ export default async function Post({ params }: { params: { postId: string } }) {
                 <div className="w-full aspect-[4/3] overflow-hidden rounded-lg mb-3 relative bg-gray-100 dark:bg-gray-800">
                   {rpost.image?.url && (
                     <Image
-                      src={rpost.image.url}
+                      src={rpost.image?.formats?.medium?.url || rpost.image?.formats?.small?.url || rpost.image.url}
                       alt={rpost.title}
                       fill
                       sizes="(max-width: 768px) 100vw, 30vw"

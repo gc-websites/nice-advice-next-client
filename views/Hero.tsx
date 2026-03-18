@@ -49,7 +49,7 @@ const Hero = ({ popularPosts }: HeroProps) => {
             <div className="w-full aspect-[4/3] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 relative">
               {popularPosts[0].image?.url && (
                 <Image
-                  src={popularPosts[0].image.url}
+                  src={popularPosts[0].image?.formats?.large?.url || popularPosts[0].image?.formats?.medium?.url || popularPosts[0].image.url}
                   alt={popularPosts[0].title}
                   fill
                   priority
@@ -85,7 +85,7 @@ const Hero = ({ popularPosts }: HeroProps) => {
                 <div className="flex items-center pb-2 flex-wrap gap-3">
                   {post.author?.avatar?.url ? (
                     <Image
-                      src={post.author.avatar.url}
+                      src={post.author?.avatar?.formats?.thumbnail?.url || post.author.avatar.url}
                       alt={post.author.name}
                       width={36}
                       height={36}
@@ -111,7 +111,7 @@ const Hero = ({ popularPosts }: HeroProps) => {
                 <div className="w-full aspect-[4/3] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 relative">
                   {post.image?.url && (
                     <Image
-                      src={post.image.url}
+                      src={post.image?.formats?.medium?.url || post.image?.formats?.small?.url || post.image.url}
                       alt={post.title}
                       fill
                       sizes="(max-width: 768px) 100vw, 30vw"
