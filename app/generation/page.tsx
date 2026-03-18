@@ -1,5 +1,3 @@
-'use client';
-
 export default function Generation() {
   return (
     <div className="h-[70vh] flex justify-center items-center">

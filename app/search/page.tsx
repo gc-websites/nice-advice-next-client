@@ -1,58 +1,41 @@
-'use client';
-import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { getSearchedPosts } from '@/services/postsAPI';
-
 import Pagination from '@/components/Pagination';
-import Loader from '@/components/Loader';
-import Categories from '@/views/Categories';
 import RenderDescription from '@/components/RenderDescription';
 
-function SearchContent() {
-  const [posts, setPosts] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageCount, setPageCount] = useState(1);
+export default async function Search({
+  searchParams,
+}: {
+  searchParams: { query?: string; page?: string };
+}) {
+  const { query, page } = await searchParams;
+  const currentPage = Number(page) || 1;
   const pageSize = 10;
+
+  let postsData;
   
-  const searchParams = useSearchParams();
-  const query = searchParams.get('query');
-
-  useEffect(() => {
-    if (!query || query.length < 3) return;
-
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const result = await getSearchedPosts(query, currentPage, pageSize);
-        setPosts(result.data);
-        setPageCount(result.meta.pagination.pageCount);
-        window.scrollTo(0, 0);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [query, currentPage]);
-
-  if (isLoading) {
-    return <Loader />;
+  if (query && query.length >= 3) {
+    try {
+      postsData = await getSearchedPosts(query, currentPage, pageSize);
+    } catch (error) {
+      console.error('Failed to fetch search results:', error);
+    }
   }
+
+  const posts = postsData?.data || [];
+  const pageCount = postsData?.meta?.pagination?.pageCount || 1;
 
   return (
     <section className="container pt-12">
       <h2 className="section__title mb-6 text-mainText dark:text-white break-words">
-        Search results for: "{query}"
+        Search results for: "{query || ''}"
       </h2>
+      
       {posts.length > 0 ? (
         <div>
           <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 h-full">
-              {posts?.map(post => (
+              {posts.map((post: any) => (
                 <Link
                   key={post.documentId}
                   href={`/post/${post.documentId}`}
@@ -82,25 +65,22 @@ function SearchContent() {
               ))}
             </div>
           </div>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={pageCount}
-            onPageChange={setCurrentPage}
-          />
+          
+          {pageCount > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={pageCount}
+              basePath="/search"
+            />
+          )}
         </div>
       ) : (
-        !isLoading && <p className="section__description">Nothing found 😕</p>
+        <p className="section__description">
+          {(!query || query.length < 3) 
+            ? 'Please enter at least 3 characters to search.' 
+            : 'Nothing found 😕'}
+        </p>
       )}
     </section>
-  );
-}
-
-export default function Search() {
-  return (
-    <div>
-      <Suspense fallback={<Loader />}>
-        <SearchContent />
-      </Suspense>
-    </div>
   );
 }
