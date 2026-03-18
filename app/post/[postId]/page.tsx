@@ -80,7 +80,7 @@ export default async function Post({ params }: { params: { postId: string } }) {
             <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
               {post.image?.url && (
                 <Image
-                  src={post.image?.formats?.large?.url || post.image?.formats?.medium?.url || post.image.url}
+                  src={post.image?.formats?.medium?.url || post.image?.formats?.large?.url || post.image.url}
                   alt={post.title}
                   fill
                   priority

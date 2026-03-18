@@ -13,7 +13,7 @@ const Hero = ({ popularPosts }: HeroProps) => {
   }
   return (
     <section className="container section__padding pt-0">
-      <h1 className="section__title mb-6 invisible">Nice Advice</h1>
+      <h1 className="section__title mb-6 sr-only">Nice Advice</h1>
       {popularPosts && popularPosts.length > 0 && (
         <div className="grid md:grid-cols-[70%_30%] gap-6">
           <Link
@@ -49,7 +49,7 @@ const Hero = ({ popularPosts }: HeroProps) => {
             <div className="w-full aspect-[4/3] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 relative">
               {popularPosts[0].image?.url && (
                 <Image
-                  src={popularPosts[0].image?.formats?.large?.url || popularPosts[0].image?.formats?.medium?.url || popularPosts[0].image.url}
+                  src={popularPosts[0].image?.formats?.medium?.url || popularPosts[0].image?.formats?.large?.url || popularPosts[0].image.url}
                   alt={popularPosts[0].title}
                   fill
                   priority
