@@ -12,8 +12,9 @@ import AdList from '../components/AdList';
 import { notFound } from 'next/navigation';
 import HorizontalAdBanner from '../views/HorizontalAdBanner';
 import Disclaimer from '../views/Disclaimer';
+import LiveViewerCount from './LiveViewerCount';
 
-const InfinitePost = ({ postIds, getReadingCount }) => {
+const InfinitePost = ({ postIds }: { postIds: string[] }) => {
   const [posts, setPosts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -224,9 +225,7 @@ const InfinitePost = ({ postIds, getReadingCount }) => {
                       )}
                   </div>
                   <div className="flex flex-col gap-2 flex-grow">
-                    <p className="section__description text-sm text-main dark:text-main">
-                      {getReadingCount(post.documentId)} reading now
-                    </p>
+                    <LiveViewerCount documentId={post.documentId} />
                     <h3 className="section__title text-lg text-mainText dark:text-white">
                       {post.title}
                     </h3>
