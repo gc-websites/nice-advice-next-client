@@ -77,7 +77,6 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -113,11 +112,6 @@ export default async function RootLayout({
         />
       </head>
       <body className={`antialiased ${merriweather.variable} ${poppins.variable}`}>
-        <Script
-          src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"
-          strategy="lazyOnload"
-        />
-
         <Layout categories={categories}>
           {children}
         </Layout>
