@@ -178,8 +178,9 @@ const InfinitePost = ({ postIds, getReadingCount }) => {
                     <Image
                       src={post.secondAdBanner.image.url}
                       alt="advertisement"
-                      fill
-                      className="border-gray-400 border-[1px] rounded object-cover"
+                      width={300}
+                      height={250}
+                      className="w-full h-auto border-gray-400 border-[1px] rounded object-cover"
                     />
                   </a>
                 </div>
