@@ -23,7 +23,7 @@ export const getCategories = async () => {
 
 export const getPopularPosts = async () => {
   const res = await fetch(
-    `${BASE_URL}/posts?populate[category]=*&populate[author][populate]=avatar&populate[image]=*&sort=createdAt:desc&pagination[page]=1&pagination[pageSize]=5`,
+    `${BASE_URL}/posts?populate[category][populate]=image&populate[author][populate]=avatar&populate[image][populate]=*&sort=createdAt:desc&pagination[page]=1&pagination[pageSize]=5`,
     DEFAULT_CACHE
   );
   if (!res.ok) throw new Error('Failed to fetch popular posts');
@@ -32,7 +32,7 @@ export const getPopularPosts = async () => {
 
 export const getPost = async (documentId: string) => {
   const res = await fetch(
-    `${BASE_URL}/posts/${documentId}?populate[paragraphs][populate]=image&populate[category]=*&populate[image]=*&populate[ads]=*&populate[firstAdBanner][populate]=image&populate[secondAdBanner][populate]=image&populate[author][populate]=avatar`,
+    `${BASE_URL}/posts/${documentId}?populate[paragraphs][populate]=image&populate[category][populate]=image&populate[image][populate]=*&populate[ads][populate]=*&populate[firstAdBanner][populate]=image&populate[secondAdBanner][populate]=image&populate[author][populate]=avatar`,
     DEFAULT_CACHE
   );
   if (!res.ok) throw new Error(`Failed to fetch post ${documentId}`);
@@ -41,7 +41,7 @@ export const getPost = async (documentId: string) => {
 
 export const getRelatedPosts = async () => {
   const res = await fetch(
-    `${BASE_URL}/posts?populate[category]=*&populate[author][populate]=avatar&populate[image]=*&filters[isPopular][$eq]=true&pagination[page]=1&pagination[pageSize]=4`,
+    `${BASE_URL}/posts?populate[category][populate]=image&populate[author][populate]=avatar&populate[image][populate]=*&filters[isPopular][$eq]=true&pagination[page]=1&pagination[pageSize]=4`,
     DEFAULT_CACHE
   );
   if (!res.ok) throw new Error('Failed to fetch related posts');
