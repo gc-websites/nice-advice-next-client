@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Category {
   documentId: number | string;
@@ -20,12 +21,14 @@ const Categories: FC<CategoriesProps> = ({ categories }) => {
           <Link
             key={documentId}
             href={`/category/${documentId}`}
-            className="relative block w-full max-w-sm rounded-lg overflow-hidden shadow-md transition-all duration-300 group hover:shadow-xl"
+            className="relative block w-full max-w-sm rounded-lg overflow-hidden shadow-md transition-all duration-300 group hover:shadow-xl md:h-96 h-72"
           >
-            <img
+            <Image
               src={image.url}
               alt={name}
-              className="object-cover w-full md:h-96 h-72 filter sepia-[.25] transition-all duration-300 group-hover:brightness-75"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              className="object-cover filter sepia-[.25] transition-all duration-300 group-hover:brightness-75"
             />
             <div className="absolute inset-0 bg-black/30 flex flex-col justify-end gap-6 transition-all duration-300 group-hover:bg-black/50 p-6">
               <span className="text-white font-inter text-3xl font-bold">

@@ -1,38 +1,15 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { getPopularPosts } from '../services/postsAPI';
 import Link from 'next/link';
-
 import Image from 'next/image';
 import dot from '@/public/assets/svg/dot.svg';
-import Loader from '../components/Loader';
-import { notFound } from 'next/navigation';
 import RenderDescription from '../components/RenderDescription';
 
-const Hero = () => {
-  const [popularPosts, setPopularPosts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface HeroProps {
+  popularPosts: any[];
+}
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const data = await getPopularPosts();
-        setPopularPosts(data.data);
-        console.log(data.data);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  if (isLoading) {
-    return <Loader />;
-  }
-  if (popularPosts.length === 0) {
+const Hero = ({ popularPosts }: HeroProps) => {
+  if (!popularPosts || popularPosts.length === 0) {
     return null;
   }
   return (

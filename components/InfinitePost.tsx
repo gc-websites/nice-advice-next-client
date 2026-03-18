@@ -87,8 +87,8 @@ const InfinitePost = ({ postIds, getReadingCount }) => {
                   className="flex items-center flex-wrap gap-4"
                 >
                   <Image
-                    src={post.author.avatar.url}
-                    alt={post.author.name}
+                    src={post.author?.avatar?.url || '/fallback-avatar.png'}
+                    alt={post.author?.name || 'Author'}
                     width={48}
                     height={48}
                     className="rounded-full w-12 h-12 object-cover block"
@@ -114,14 +114,16 @@ const InfinitePost = ({ postIds, getReadingCount }) => {
                 {post.category.name}
               </span>
 
-              <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative">
-                <Image
-                  src={post.image.url}
-                  alt={post.title}
-                  fill
-                  sizes="100vw"
-                  className="object-cover object-center"
-                />
+              <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
+                {post.image?.url && (
+                  <Image
+                    src={post.image.url}
+                    alt={post.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 70vw"
+                    className="object-cover object-center"
+                  />
+                )}
               </div>
 
               <div className="mt-6 flex flex-col gap-4 pb-4">
@@ -145,14 +147,16 @@ const InfinitePost = ({ postIds, getReadingCount }) => {
                         truncate={false}
                       />
                       {/* <AdList ads={ads} /> */}
-                      <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative">
-                        <Image
-                          src={image.url}
-                          alt={subtitle}
-                          fill
-                          sizes="100vw"
-                          className="object-cover object-center"
-                        />
+                      <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
+                        {image?.url && (
+                          <Image
+                            src={image.url}
+                            alt={subtitle}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 70vw"
+                            className="object-cover object-center"
+                          />
+                        )}
                       </div>
                     </div>
                   ),
@@ -174,9 +178,8 @@ const InfinitePost = ({ postIds, getReadingCount }) => {
                     <Image
                       src={post.secondAdBanner.image.url}
                       alt="advertisement"
-                      width={300}
-                      height={250}
-                      className="w-full border-gray-400 border-[1px] rounded object-cover"
+                      fill
+                      className="border-gray-400 border-[1px] rounded object-cover"
                     />
                   </a>
                 </div>
@@ -190,8 +193,8 @@ const InfinitePost = ({ postIds, getReadingCount }) => {
                 >
                   <div className="flex items-center pb-2 flex-wrap gap-3">
                     <Image
-                      src={post.author.avatar.url}
-                      alt={post.author.name}
+                      src={post.author?.avatar?.url || '/fallback-avatar.png'}
+                      alt={post.author?.name || 'Author'}
                       width={36}
                       height={36}
                       className="rounded-full w-9 h-9 object-cover block"
@@ -208,14 +211,16 @@ const InfinitePost = ({ postIds, getReadingCount }) => {
                       }).format(new Date(post.createdAt))}
                     </p>
                   </div>
-                  <div className="w-full aspect-[4/3] overflow-hidden rounded-lg mb-3 relative">
-                      <Image
-                        src={post.image.url}
-                        alt={post.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        className="object-cover object-center transform group-hover:scale-105 transition duration-300"
-                      />
+                  <div className="w-full aspect-[4/3] overflow-hidden rounded-lg mb-3 relative bg-gray-100 dark:bg-gray-800">
+                      {post.image?.url && (
+                        <Image
+                          src={post.image.url}
+                          alt={post.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          className="object-cover object-center transform group-hover:scale-105 transition duration-300"
+                        />
+                      )}
                   </div>
                   <div className="flex flex-col gap-2 flex-grow">
                     <p className="section__description text-sm text-main dark:text-main">
