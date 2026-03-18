@@ -93,9 +93,9 @@ const InfinitePost = ({ postIds, getReadingCount }) => {
                     height={48}
                     className="rounded-full w-12 h-12 object-cover block"
                   />
-                  <h5 className="section__title underline hover:text-main transition text-base font-bold">
+                  <div className="section__title underline hover:text-main transition text-base font-bold">
                     {post.author.name}
-                  </h5>
+                  </div>
                 </Link>
                     <Image src={dot?.src || dot} alt="dot" width={8} height={8} className="w-2 h-2" />
                 <p className="section__description text-additionalText text-sm">
@@ -196,9 +196,9 @@ const InfinitePost = ({ postIds, getReadingCount }) => {
                       height={36}
                       className="rounded-full w-9 h-9 object-cover block"
                     />
-                    <h5 className="section__title text-sm font-bold">
+                    <div className="section__title text-sm font-bold">
                       {post.author.name}
-                    </h5>
+                    </div>
                         <Image src={dot?.src || dot} alt="dot" width={8} height={8} className="w-2 h-2" />
                     <p className="section__description text-additionalText text-xs">
                       {new Intl.DateTimeFormat('en-US', {

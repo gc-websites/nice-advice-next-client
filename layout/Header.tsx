@@ -57,6 +57,7 @@ const Header: FC<HeaderProps> = ({ categories }) => {
         <button
           className="flex justify-center items-center cursor-pointer"
           onClick={() => setIsBurgerOpen(true)}
+          aria-label="Open menu"
         >
           <svg
             className="h-10 md:h-6 stroke-main3"
@@ -75,6 +76,7 @@ const Header: FC<HeaderProps> = ({ categories }) => {
           <button
             className="justify-center items-center cursor-pointer"
             onClick={handleSearchClick}
+            aria-label="Search"
           >
             <svg
               className="h-4 fill-main3"

@@ -2,7 +2,7 @@ const Disclaimer = () => {
   return (
     <section className="section__padding bg-slate-50 dark:bg-additionalText">
       <div className="container">
-        <h4 className="section__title text-base pb-4">Disclaimer</h4>
+        <h2 className="section__title text-base pb-4">Disclaimer</h2>
         <p className="section__description text-sm">
           This site offers information designed for educational purposes only.
           You should not rely on any information on this site as a substitute

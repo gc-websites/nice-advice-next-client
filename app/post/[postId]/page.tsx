@@ -174,9 +174,9 @@ export default function Post() {
                 alt={post.author?.name}
                 className="rounded-full w-12 h-12"
               />
-              <h5 className="section__title underline hover:text-main transition text-base font-bold">
+              <div className="section__title underline hover:text-main transition text-base font-bold">
                 {post.author?.name}
-              </h5>
+              </div>
             </Link>
             <img src={dot?.src || dot} alt="dot" className="w-2 h-2" />
             <p className="section__description text-additionalText text-sm">
@@ -289,6 +289,7 @@ export default function Post() {
                         <button
                           type="button"
                           onClick={handleEmailModalClose}
+                          aria-label="Close modal"
                           className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 bg-gray-100/50 hover:bg-gray-200/50 dark:bg-gray-800/50 dark:hover:bg-gray-700/50 rounded-full transition-colors z-10"
                         >
                           <svg
@@ -393,9 +394,9 @@ export default function Post() {
                   alt={rpost.author?.name}
                   className="rounded-full w-9 h-9"
                 />
-                <h5 className="section__title text-sm font-bold">
+                <div className="section__title text-sm font-bold">
                   {rpost.author?.name}
-                </h5>
+                </div>
                 <img src={dot?.src || dot} alt="dot" className="w-2 h-2" />
                 <p className="section__description text-additionalText text-xs">
                   {new Intl.DateTimeFormat('en-US', {

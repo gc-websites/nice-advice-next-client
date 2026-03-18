@@ -56,11 +56,11 @@ const Hero = () => {
               ) : (
                 <div className="rounded-full w-12 h-12 bg-gray-200 dark:bg-gray-700 flex-shrink-0"></div>
               )}
-              <h5 className="section__title text-base font-bold">
+              <div className="section__title text-base font-bold">
                 <p className="text-mainText dark:text-white">
                   {popularPosts[0].author?.name}
                 </p>
-              </h5>
+              </div>
               <Image src={dot?.src || dot} alt="dot" width={8} height={8} className="w-2 h-2" />
               <p className="section__description text-additionalText text-sm">
                 {new Intl.DateTimeFormat('en-US', {
@@ -117,11 +117,11 @@ const Hero = () => {
                   ) : (
                     <div className="rounded-full w-9 h-9 bg-gray-200 dark:bg-gray-700 flex-shrink-0"></div>
                   )}
-                  <h5 className="section__title text-sm font-bold">
+                  <div className="section__title text-sm font-bold">
                     <p className="text-mainText dark:text-white">
                       {post.author?.name}
                     </p>
-                  </h5>
+                  </div>
                   <Image src={dot?.src || dot} alt="dot" width={8} height={8} className="w-2 h-2" />
                   <p className="section__description text-additionalText text-xs">
                     {new Intl.DateTimeFormat('en-US', {
