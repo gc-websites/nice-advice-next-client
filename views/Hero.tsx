@@ -12,7 +12,7 @@ const Hero = ({ popularPosts }: HeroProps) => {
     return null;
   }
   return (
-    <section className="container section__padding pt-0">
+    <section className="container section__padding pt-8 md:pt-12">
       <h1 className="section__title mb-6 sr-only">Nice Advice</h1>
       {popularPosts && popularPosts.length > 0 && (
         <div className="grid md:grid-cols-[70%_30%] gap-6">
