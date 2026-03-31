@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from 'react';
 
 interface GoogleAdProps {
@@ -15,23 +17,29 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
   adFormat,
   fullWidthResponsive,
 }) => {
+  const adRef = React.useRef<HTMLModElement>(null);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        // Prevent "No slot size for availableWidth=0" error by ensuring container is visible
+        if (adRef.current && adRef.current.clientWidth > 0) {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        }
       } catch (e) {
         console.error('AdSense error:', e);
       }
-    }, 100);
+    }, 200);
     return () => clearTimeout(timer);
   }, [adSlot]);
 
   return (
-    <div key={adSlot} className={`ad-container ${className}`}>
+    <div key={`container-${adSlot}`} className={`ad-container ${className}`}>
       <ins
+        ref={adRef}
         className="adsbygoogle"
-        style={{ ...style, maxWidth: '100%' }}
+        style={{ ...style, width: '100%', minWidth: '250px', maxWidth: '100%' }}
         data-ad-client="ca-pub-1088654265590051"
         data-ad-slot={adSlot}
         {...(adFormat ? { 'data-ad-format': adFormat } : {})}
