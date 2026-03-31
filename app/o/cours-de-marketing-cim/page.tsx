@@ -262,9 +262,9 @@ export default function CIMMarketingCourseFrFullGuidePage() {
                 <h2 className="text-[26px] font-bold text-[#1f2937] mb-4">Se Préparer Avant et Durant l'Admission</h2>
                 <p>Élaborer avec exactitude les cibles techniques sur un horizon annuel offre un cadre robuste assurant la complétion ponctuelle totale des études sans sursauts ou délais préjudiciables.</p>
                 <ul className="list-disc pl-6 space-y-2">
-                    <li><strong>Identifiez de manière circonscrite l'expertise de niche</em> technique de logicielle</em> et plateformes</strong> d'affichages commerciaux réclamées ultérieurement sur vos lignes hiérarchiques futures.</li>
+                    <li><strong>Identifiez de manière circonscrite l'expertise de niche <em>technique de logicielle</em> et plateformes</strong> d'affichages commerciaux réclamées ultérieurement sur vos lignes hiérarchiques futures.</li>
                     <li><strong>Gelez préventivement auprès de tout directeur en exercice</strong> vos disponibilités garantissant des temps calmes de travail réflexif indispensables d'absorptions académiques d'articles textuels et recherches analytiques de cas d'écoles.</li>
-                    <li><strong>Amalgamez astucieusement vos missions et travaux réels à opérer du moment</Strong> comme livrable de vos obligations professorales exigées afin de maximiser de façon efficiente vos journées occupatives réparties de travail standard global salarial.</li>
+                    <li><strong>Amalgamez astucieusement vos missions et travaux réels à opérer du moment</strong> comme livrable de vos obligations professorales exigées afin de maximiser de façon efficiente vos journées occupatives réparties de travail standard global salarial.</li>
                 </ul>
                 <p>Combiner ses exigences salariales normatives pour l'épanouissement évaluatif du curcus offre le contexte académique de pratique de plus haut potentiel possible sans redondances.</p>
               </section>
