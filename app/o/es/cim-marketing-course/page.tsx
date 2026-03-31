@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import { Metadata } from 'next';
 import GoogleAd from '../../../../components/GoogleAd';
+import ClickTracker from '../../../../components/ClickTracker';
+import TrackedCTALink from '../../../../components/TrackedCTALink';
 
 export const metadata: Metadata = {
   title: 'Curso de Marketing en Línea CIM: La Guía Completa',
@@ -24,6 +26,7 @@ export default function CIMMarketingCourseFullGuidePageES() {
           {/* Main Content Column */}
           <main className="w-full max-w-[830px] bg-white rounded-xl shadow-sm border border-[#eaeaea] overflow-hidden text-gray-800 font-sans p-6 sm:p-10">
             <article>
+              <ClickTracker locale="es" prelendSlug="cim-marketing-course" eventType="prelend_view" />
               <header className="mb-6">
                 <h1 className="text-[32px] sm:text-[40px] font-bold text-[#1f2937] leading-tight mb-3 tracking-tight">
                   Curso de Marketing en Línea CIM: La Guía Completa para Certificarse
@@ -31,7 +34,7 @@ export default function CIMMarketingCourseFullGuidePageES() {
                 <div className="flex flex-wrap items-center text-[#6b7280] text-[15px] gap-2">
                   <span>22/10/2026</span>
                   <span className="text-gray-400">•</span>
-                  <span>Equipo Editorial Gaulois</span>
+                  <span>Equipo Editorial Nice Advice</span>
                 </div>
               </header>
 
@@ -336,15 +339,18 @@ function FeatureItem({ icon, title, description }: { icon: React.ReactNode, titl
 
 function CTAButton({ text }: { text: string }) {
   return (
-    <a 
-      href="https://www.cim.co.uk/learn-develop/qualifications/marketing-apprenticeships/" 
+    <TrackedCTALink 
+      href="https://www.cim.co.uk/learn-develop/qualifications/marketing-apprenticeships/"
+      locale="es"
+      prelendSlug="cim-marketing-course"
+      eventType="outbound_click"
       target="_blank"
       rel="noopener noreferrer"
       className="flex items-center justify-center gap-3 bg-[#269752] hover:bg-[#1f7e44] transition-colors text-white font-bold text-[17px] sm:text-[18px] py-[18px] px-6 rounded-md w-full uppercase tracking-wide shadow-sm"
     >
       {text}
       <ArrowRightCircleIcon />
-    </a>
+    </TrackedCTALink>
   );
 }
 

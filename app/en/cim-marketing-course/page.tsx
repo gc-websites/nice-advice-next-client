@@ -2,6 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import GoogleAd from '../../../components/GoogleAd';
+import ClickTracker from '../../../components/ClickTracker';
+import TrackedCTALink from '../../../components/TrackedCTALink';
 
 export const metadata: Metadata = {
   title: 'CIM Digital Marketing Certification',
@@ -13,6 +15,7 @@ export default function CIMMarketingCoursePage() {
     <div className="bg-[#fcfcfc] min-h-screen py-8 sm:py-12">
       <main className="w-full max-w-[830px] mx-auto bg-white rounded-xl shadow-sm overflow-hidden text-gray-800 font-sans p-6 sm:p-10 border border-[#eaeaea]">
         <article>
+          <ClickTracker locale="en" prelendSlug="cim-marketing-course" />
           <header className="mb-6">
             <h1 className="text-[32px] sm:text-[38px] font-bold text-[#1f2937] leading-tight mb-3 tracking-tight">
               CIM Digital Marketing Qualification
@@ -20,7 +23,7 @@ export default function CIMMarketingCoursePage() {
             <div className="flex flex-wrap items-center text-[#6b7280] text-[15px] gap-2">
               <span>10/03/2026</span>
               <span className="text-gray-400">•</span>
-              <span>Editorial Team Gaulois</span>
+              <span>Editorial Team Nice Advice</span>
             </div>
           </header>
 
@@ -139,13 +142,15 @@ function CheckPoint({ title, description }: { title: string, description: string
 
 function CTAButton() {
   return (
-    <a 
-      href="/o/en/cim-marketing-course" 
+    <TrackedCTALink 
+      href="/o/en/cim-marketing-course"
+      locale="en"
+      prelendSlug="cim-marketing-course"
       className="flex items-center justify-center gap-3 bg-[#269752] hover:bg-[#1f7e44] transition-colors text-white font-bold text-[17px] sm:text-[18px] py-[18px] px-6 rounded-md w-full uppercase tracking-wide shadow-sm"
     >
       I want to see more details
       <ArrowRightCircleIcon />
-    </a>
+    </TrackedCTALink>
   );
 }
 
