@@ -4,6 +4,7 @@ import './globals.css';
 import Layout from '@/layout/Layout';
 import { getCategories } from '@/services/postsAPI';
 import CookieConsent from '@/components/CookieConsent';
+import { GoogleTagManager } from '@next/third-parties/google';
 import { Merriweather, Poppins } from 'next/font/google';
 
 const merriweather = Merriweather({
@@ -117,6 +118,7 @@ export default async function RootLayout({
           }}
         />
       </head>
+      <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || 'GTM-NZS7G3BL'} />
       <body className={`antialiased ${merriweather.variable} ${poppins.variable}`}>
         <Layout categories={categories}>
           {children}
