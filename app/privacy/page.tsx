@@ -35,8 +35,8 @@ export default function PrivacyPolicy() {
       </ul>
       <p className="section__description">
         Thank you for visiting niceadvice.com (the “Site”). The Site is an
-        Internet property of Assembly Digital Limited and its affiliated
-        companies (“Assembly”, “our”, “we” or “us”). Assembly is committed to
+        Internet property of Nice Advice and its affiliated
+        companies (“Nice Advice”, “our”, “we” or “us”). Nice Advice is committed to
         protecting your privacy. We have prepared this privacy policy (“Privacy
         Policy”) to describe to you and to outline our practices and policies
         associated with any information (such as Site Data, Anonymous Data, and
@@ -61,7 +61,7 @@ export default function PrivacyPolicy() {
           Legitimate Interest. We will process your Personal Data based on
           Legitimate Interest, and particularly where it is used for marketing
           and business purposes, and to contact you to start a conversation
-          regarding your use of the Site or any Assembly newsletters that you
+          regarding your use of the Site or any Nice Advice newsletters that you
           wish to join.
         </li>
         <li>
@@ -98,32 +98,37 @@ export default function PrivacyPolicy() {
         however, we will not share any Anonymous Data if such information is,
         contains, or will be linked to your Personal Data, unless we have given
         you notice, as described in this Privacy Policy, and you have given us
-        authorization to do so. Assembly will use Personal Data and IP addresses
+        authorization to do so. Nice Advice will use Personal Data and IP addresses
         to identify users of the Site if and when we feel it is necessary to
         enforce compliance with the Site’s policies or to protect our services,
         the Site, or other users of the Site and/or services.
       </p>
       <h3 className="section__title text-2xl">Security of Data</h3>
       <p className="section__description">
-        Assembly is committed to protecting the security of any Personal Data
-        that is collected by Assembly. We use a variety of industry-standard
+        Nice Advice is committed to protecting the security of any Personal Data
+        that is collected by Nice Advice. We use a variety of industry-standard
         security technologies and procedures to help protect any Personal Data
         from unauthorized access, use, or disclosure. Despite these measures, no
         method of transmission over the Internet, or method of electronic
-        storage is 100% secure. Assembly cannot fully eliminate security risks
+        storage is 100% secure. Nice Advice cannot fully eliminate security risks
         associated with the collection and storage of any Personal Data,
         including without limitation, any mistakes and security breaches that
         may happen. While we strive to use commercially acceptable means to
         protect your Personal Data, we cannot guarantee its absolute security.
         In the unlikely event of a data breach where your Personal Data has been
-        compromised, Assembly will promptly notify you, the applicable
+        compromised, Nice Advice will promptly notify you, the applicable
         authorities and supervisory authorities or data protection authorities.
-        If you are located in the EU/EEA and Assembly is required to transfer
+        If you are located in the EU/EEA and Nice Advice is required to transfer
         your Personal Data in accordance with this Privacy Policy, we exert
         commercially reasonable efforts to ensure that any transfer of your
         Personal Data outside of the EU/EEA is protected under industry-standard
         contractual clauses and any subsequent data protection safeguards.
       </p>
+      <h3 className="section__title text-2xl">Cookies and Third-Party Advertising</h3>
+      <p className="section__description">
+        We use third-party advertising companies, such as Google AdSense, to serve ads when you visit our Site. These companies use cookies to serve ads based on your prior visits to our Site or other websites. Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visit to our sites and/or other sites on the Internet. You may opt out of personalized advertising by visiting <a href="https://myadcenter.google.com/" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Google Ads Settings</a> or by visiting <a href="https://www.aboutads.info/choices/" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">www.aboutads.info</a>.
+      </p>
+      
       <h3 className="section__title text-2xl">Changes to This Privacy Policy</h3>
       <p className="section__description">
         We reserve the right, in our sole discretion, to modify, update and
@@ -135,12 +140,9 @@ export default function PrivacyPolicy() {
         Privacy Policy will constitute your acknowledgment and acceptance of any
         and all changes.
       </p>
-      <h3 className="section__title text-2xl">Amazon user agreement</h3>
+      <h3 className="section__title text-2xl">Affiliate Disclosure</h3>
       <p className="section__description">
-        Nice-advice.info is a participant in the Amazon Services LLC Associates
-        Program, an affiliate advertising program designed to provide a means
-        for sites to earn advertising fees by advertising and linking to
-        Amazon.com.
+        Nice-advice.info participates in various affiliate marketing programs, including the Amazon Services LLC Associates Program. This means we may earn a commission when you click on or make purchases via affiliate links (including but not limited to Amazon.com and external educational institutions like CIM), at no additional cost to you.
       </p>
     </div>
   );

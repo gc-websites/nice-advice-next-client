@@ -1,0 +1,13 @@
+
+> nice-advice-next-client@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.31.8:3000
+
+✓ Starting...
+✓ Ready in 748ms
+ HEAD /en/cim-marketing-course 200 in 678ms (compile: 494ms, render: 184ms)
+ GET /en/cim-marketing-course 200 in 174ms (compile: 6ms, render: 168ms)
+ GET /o/en/cim-marketing-course 200 in 527ms (compile: 105ms, render: 422ms)

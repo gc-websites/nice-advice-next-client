@@ -41,7 +41,7 @@ function sendTrackEvent(data: Record<string, unknown>) {
         method: 'POST',
         body: blob,
         keepalive: true,
-      }).catch(() => {});
+      }).catch(() => { });
     }
   } catch {
     // Silently fail — never break UX
