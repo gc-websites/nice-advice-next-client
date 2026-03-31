@@ -15,19 +15,24 @@ function getSessionId(): string {
   return sid;
 }
 
-// Parse UTM and ad params from URL
+// Parse UTM and ad params from URL and persist them in sessionStorage
 function getTrackingParams() {
   if (typeof window === 'undefined') return {};
   const params = new URLSearchParams(window.location.search);
-  return {
-    utm_source: params.get('utm_source') || undefined,
-    utm_medium: params.get('utm_medium') || undefined,
-    utm_campaign: params.get('utm_campaign') || undefined,
-    utm_term: params.get('utm_term') || undefined,
-    utm_content: params.get('utm_content') || undefined,
-    gclid: params.get('gclid') || undefined,
-    fbclid: params.get('fbclid') || undefined,
-  };
+  const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid'];
+  const tracking: Record<string, string | undefined> = {};
+
+  keys.forEach(key => {
+    const val = params.get(key);
+    if (val) {
+      sessionStorage.setItem(`na_${key}`, val);
+      tracking[key] = val;
+    } else {
+      tracking[key] = sessionStorage.getItem(`na_${key}`) || undefined;
+    }
+  });
+
+  return tracking;
 }
 
 // Send tracking event via sendBeacon (non-blocking)
