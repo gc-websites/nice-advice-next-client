@@ -7,12 +7,19 @@ const TRACKING_API = 'https://api.nice-advice.info/track-click';
 // Generate or retrieve session ID
 function getSessionId(): string {
   if (typeof window === 'undefined') return '';
-  let sid = sessionStorage.getItem('na_session_id');
-  if (!sid) {
-    sid = crypto.randomUUID();
-    sessionStorage.setItem('na_session_id', sid);
+  try {
+    let sid = sessionStorage.getItem('na_session_id');
+    if (!sid) {
+      // Fallback for random ID if crypto.randomUUID is not available
+      sid = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+        ? crypto.randomUUID() 
+        : Math.random().toString(36).substring(2, 15);
+      sessionStorage.setItem('na_session_id', sid);
+    }
+    return sid;
+  } catch (e) {
+    return 'fallback-sid-' + Date.now();
   }
-  return sid;
 }
 
 // Parse UTM and ad params from URL and persist them in sessionStorage
