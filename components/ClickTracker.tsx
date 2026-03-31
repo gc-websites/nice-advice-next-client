@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 const TRACKING_API = 'https://api.nice-advice.info/track-click';
 
@@ -45,6 +46,12 @@ function getTrackingParams() {
 // Send tracking event via sendBeacon (non-blocking)
 function sendTrackEvent(data: Record<string, unknown>) {
   try {
+    // 1. Send to Google Tag Manager
+    if (data.event_type) {
+      sendGTMEvent({ event: data.event_type as string, ...data });
+    }
+
+    // 2. Send to Custom Server via Beacon
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
     if (navigator.sendBeacon) {
       navigator.sendBeacon(TRACKING_API, blob);
