@@ -23,20 +23,28 @@ function getSessionId(): string {
   }
 }
 
-// Parse UTM and ad params from URL and persist them in sessionStorage
+// Parse UTM, ad, and FB params from URL and persist them in sessionStorage
 function getTrackingParams() {
   if (typeof window === 'undefined') return {};
   const params = new URLSearchParams(window.location.search);
-  const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid'];
+  const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid', 'pixel', 'event', 'pixel_mode', 'fire'];
   const tracking: Record<string, string | undefined> = {};
 
   keys.forEach(key => {
     const val = params.get(key);
+    // For fb params, we prefix them as na_fb_ in session storage inside DynamicPixel, 
+    // but here we can just pick them up from na_${key} or na_fb_${key}
+    const storageKey = ['pixel', 'event', 'pixel_mode', 'fire'].includes(key) ? `na_fb_${key}` : `na_${key}`;
+    const trackingKey = ['pixel', 'event', 'pixel_mode', 'fire'].includes(key) ? `fb_${key}` : key;
+    
+    // Quick fix: replace fb_fire with fb_fire_type to match Strapi/DynamicPixel
+    const finalTrackingKey = trackingKey === 'fb_fire' ? 'fb_fire_type' : trackingKey;
+
     if (val) {
-      sessionStorage.setItem(`na_${key}`, val);
-      tracking[key] = val;
+      sessionStorage.setItem(storageKey, val);
+      tracking[finalTrackingKey] = val;
     } else {
-      tracking[key] = sessionStorage.getItem(`na_${key}`) || undefined;
+      tracking[finalTrackingKey] = sessionStorage.getItem(storageKey) || undefined;
     }
   });
 
@@ -103,6 +111,18 @@ export default function ClickTracker({ locale, prelendSlug, eventType = 'prelend
 export function useTrackClick(locale: 'en' | 'fr' | 'es', prelendSlug: string) {
   return useCallback((destinationUrl: string, eventType: 'cta_click' | 'outbound_click' = 'cta_click') => {
     const trackingParams = getTrackingParams();
+    
+    // Trigger Facebook Pixel if configured for 'click'
+    if (eventType === 'cta_click' && trackingParams.fb_fire_type === 'click' && trackingParams.fb_event && trackingParams.fb_pixel) {
+      if (typeof window !== 'undefined') {
+        // @ts-ignore
+        if (window.fbq) {
+          // @ts-ignore
+          window.fbq('track', trackingParams.fb_event);
+        }
+      }
+    }
+
     sendTrackEvent({
       session_id: getSessionId(),
       event_type: eventType,
