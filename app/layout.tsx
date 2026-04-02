@@ -6,8 +6,6 @@ import { getCategories } from '@/services/postsAPI';
 import CookieConsent from '@/components/CookieConsent';
 import { GoogleTagManager } from '@next/third-parties/google';
 import { Merriweather, Poppins } from 'next/font/google';
-import DynamicPixel from '@/components/DynamicPixel';
-import { Suspense } from 'react';
 
 const merriweather = Merriweather({
   weight: ['300', '400', '700', '900'],
@@ -122,10 +120,50 @@ export default async function RootLayout({
       </head>
       <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || 'GTM-NZS7G3BL'} />
       <body className={`antialiased ${merriweather.variable} ${poppins.variable}`}>
-        <Suspense fallback={null}>
-          <DynamicPixel />
-        </Suspense>
-        
+        <Script id="fb-pixel-init" strategy="afterInteractive" dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              try {
+                var params = new URLSearchParams(window.location.search);
+                var urlPixel = params.get('pixel');
+                var urlEvent = params.get('event');
+                var urlFire = params.get('fire');
+                var urlPixelMode = params.get('pixel_mode');
+
+                var finalPixelId = urlPixel || sessionStorage.getItem('na_fb_pixel');
+
+                if (urlPixel) {
+                  sessionStorage.setItem('na_fb_pixel', urlPixel);
+                  if (urlEvent) sessionStorage.setItem('na_fb_event', urlEvent);
+                  if (urlFire) sessionStorage.setItem('na_fb_fire_type', urlFire);
+                  if (urlPixelMode) sessionStorage.setItem('na_fb_pixel_mode', urlPixelMode);
+                }
+
+                if (finalPixelId) {
+                  !function(f,b,e,v,n,t,s)
+                  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                  n.queue=[];t=b.createElement(e);t.async=!0;
+                  t.src=v;s=b.getElementsByTagName(e)[0];
+                  s.parentNode.insertBefore(t,s)}(window, document,'script',
+                  'https://connect.facebook.net/en_US/fbevents.js');
+                  
+                  fbq('init', finalPixelId);
+                  fbq('track', 'PageView');
+                  
+                  var currentEvent = urlEvent || sessionStorage.getItem('na_fb_event');
+                  var fireType = urlFire || sessionStorage.getItem('na_fb_fire_type');
+                  
+                  if (currentEvent && fireType !== 'click') {
+                    fbq('track', currentEvent);
+                  }
+                }
+              } catch (e) {}
+            })();
+          `
+        }} />
+
         <Layout categories={categories}>
           {children}
         </Layout>
