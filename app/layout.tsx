@@ -167,7 +167,7 @@ export default async function RootLayout({
         <Layout categories={categories}>
           {children}
         </Layout>
-        
+
         <div id="modal"></div>
         <CookieConsent />
       </body>
