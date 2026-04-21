@@ -12,7 +12,7 @@ interface CommentsProps {
   initialComments: Comment[];
 }
 
-const SERVER_URL = 'https://dev.nice-advice.info';
+const SERVER_URL = 'https://api.nice-advice.info';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
