@@ -5,6 +5,7 @@ import { FC, FormEvent, useState, useRef, useEffect } from 'react';
 interface Comment {
   username: string;
   text: string;
+  createdAt?: string;
 }
 
 interface CommentsProps {
@@ -43,6 +44,18 @@ function getAvatarGradient(name: string): string {
   for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
   const [from, to] = PALETTE[Math.abs(h) % PALETTE.length];
   return `linear-gradient(135deg, ${from}, ${to})`;
+}
+
+function formatDate(iso?: string): string {
+  if (!iso) return '';
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    }).format(new Date(iso));
+  } catch {
+    return '';
+  }
 }
 
 // ── spinner ──────────────────────────────────────────────────────────────────
@@ -91,7 +104,7 @@ const Comments: FC<CommentsProps> = ({ postId, initialComments }) => {
       }
 
       const d = await res.json();
-      setComments((prev) => [...prev, d.comment]);
+      setComments((prev) => [...prev, { ...d.comment, createdAt: d.comment.createdAt || new Date().toISOString() }]);
       setText('');
       setOpen(false);
       setSuccess(true);
@@ -279,6 +292,11 @@ const Comments: FC<CommentsProps> = ({ postId, initialComments }) => {
                     {isLatest && success && (
                       <span className="text-[11px] px-2 py-0.5 rounded-full bg-main/10 dark:bg-main/20 text-main font-semibold">
                         just now
+                      </span>
+                    )}
+                    {c.createdAt && !( isLatest && success) && (
+                      <span className="text-[11px] text-additionalText dark:text-gray-500 font-poppins">
+                        {formatDate(c.createdAt)}
                       </span>
                     )}
                   </div>
