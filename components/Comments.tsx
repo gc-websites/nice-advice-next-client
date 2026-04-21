@@ -12,7 +12,10 @@ interface CommentsProps {
   initialComments: Comment[];
 }
 
-const SERVER_URL = 'https://api.nice-advice.info';
+const SERVER_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:4000'
+    : 'https://api.nice-advice.info';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
