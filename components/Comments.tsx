@@ -126,7 +126,7 @@ const Comments: FC<CommentsProps> = ({ postId, initialComments }) => {
         <button
           id="open-comment-form-btn"
           onClick={() => { setOpen((v) => !v); setError(''); }}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-main text-white hover:bg-main2 active:scale-[.97] transition-all duration-150 shadow-sm shadow-main/30 dark:shadow-main/10"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-main text-white hover:bg-main2 active:scale-[.97] transition-all duration-150 shadow-sm shadow-main/30 dark:shadow-main/10 cursor-pointer"
         >
           {open ? (
             <>
@@ -224,7 +224,7 @@ const Comments: FC<CommentsProps> = ({ postId, initialComments }) => {
                 id="submit-comment-btn"
                 type="submit"
                 disabled={submitting || !username.trim() || !text.trim()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-main hover:bg-main2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[.97] transition-all duration-150 shadow-md shadow-main/25"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-main hover:bg-main2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[.97] transition-all duration-150 shadow-md shadow-main/25"
               >
                 {submitting ? <><Spinner /> Posting…</> : <>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
