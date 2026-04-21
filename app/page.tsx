@@ -6,6 +6,9 @@ import SearchBar from '@/views/SearchBar';
 import Newsletter from '@/views/Newsletter';
 import { getCategories, getPopularPosts } from '@/services/postsAPI';
 
+// Re-generate this page at most every 5 minutes
+export const revalidate = 300;
+
 export default async function Home() {
   let categories = [];
   let popularPosts = [];
