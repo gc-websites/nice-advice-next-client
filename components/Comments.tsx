@@ -70,7 +70,11 @@ function Spinner() {
 
 // ── main component ────────────────────────────────────────────────────────────
 const Comments: FC<CommentsProps> = ({ postId, initialComments }) => {
-  const [comments, setComments] = useState<Comment[]>(initialComments || []);
+  const [comments, setComments] = useState<Comment[]>(
+    [...(initialComments || [])].sort((a, b) =>
+      new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+    )
+  );
   const [username, setUsername] = useState('');
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -104,7 +108,8 @@ const Comments: FC<CommentsProps> = ({ postId, initialComments }) => {
       }
 
       const d = await res.json();
-      setComments((prev) => [...prev, { ...d.comment, createdAt: d.comment.createdAt || new Date().toISOString() }]);
+      const newC = { ...d.comment, createdAt: d.comment.createdAt || new Date().toISOString() };
+      setComments((prev) => [newC, ...prev]);
       setText('');
       setOpen(false);
       setSuccess(true);
