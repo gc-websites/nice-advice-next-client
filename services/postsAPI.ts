@@ -32,12 +32,13 @@ export const getPopularPosts = async () => {
 
 export const getPost = async (documentId: string) => {
   const res = await fetch(
-    `${BASE_URL}/posts/${documentId}?populate[paragraphs][populate]=image&populate[category][populate]=image&populate[image][populate]=*&populate[ads][populate]=*&populate[firstAdBanner][populate]=image&populate[secondAdBanner][populate]=image&populate[author][populate]=avatar`,
+    `${BASE_URL}/posts/${documentId}?populate[paragraphs][populate]=image&populate[category][populate]=image&populate[image][populate]=*&populate[ads][populate]=*&populate[firstAdBanner][populate]=image&populate[secondAdBanner][populate]=image&populate[author][populate]=avatar&populate[comments]=*`,
     DEFAULT_CACHE
   );
   if (!res.ok) throw new Error(`Failed to fetch post ${documentId}`);
   return res.json();
 };
+
 
 export const getRelatedPosts = async () => {
   const res = await fetch(

@@ -12,6 +12,7 @@ import RenderDescription from '@/components/RenderDescription';
 import InfinitePost from '@/components/InfinitePost';
 import LiveViewerCount from '@/components/LiveViewerCount';
 import { SocketProvider } from '@/components/SocketProvider';
+import Comments from '@/components/Comments';
 
 export default async function Post({ params }: { params: { postId: string } }) {
   const { postId } = await params;
@@ -126,6 +127,12 @@ export default async function Post({ params }: { params: { postId: string } }) {
                 )
               )}
             </div>
+
+            {/* Comments section */}
+            <Comments
+              postId={postId}
+              initialComments={post.comments || []}
+            />
           </div>
 
           <div className="flex flex-col gap-6 h-full">
