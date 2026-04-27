@@ -1,5 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
+import AdSense from '@/components/AdSense';
 
 interface ProductData {
   image?: { url: string; formats?: any };
@@ -68,7 +69,13 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="flex flex-col md:flex-row justify-center items-start p-5 gap-4 md:gap-8 max-w-[1440px] mx-auto">
+      {/* Left Ad - Desktop Only */}
+      <AdSense slot="7699598053" className="hidden md:block w-[160px] lg:w-[300px] shrink-0 sticky top-5" />
+
       <div className="flex flex-col justify-center items-center w-full md:w-[50vw] lg:w-[40vw]">
+        {/* Mobile Ad - Mobile Only (Top) */}
+        <AdSense slot="6223090192" className="block md:hidden w-full mb-6" />
+
         <a href={amazonLink} target="_blank" rel="noopener noreferrer" className="w-full relative block">
           <img
             id="cta-image"
@@ -111,6 +118,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           Editorial Note: We independently review all products. If you make a purchase through our links, we may receive a commission
         </p>
       </div>
+
+      {/* Right Ad - Desktop Only */}
+      <AdSense slot="7699598053" className="hidden md:block w-[160px] lg:w-[300px] shrink-0 sticky top-5" />
     </div>
   );
 }
