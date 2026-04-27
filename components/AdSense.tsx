@@ -5,9 +5,10 @@ import React, { useEffect } from 'react';
 interface AdSenseProps {
   slot: string;
   className?: string;
+  format?: string;
 }
 
-export default function AdSense({ slot, className = '' }: AdSenseProps) {
+export default function AdSense({ slot, className = '', format = 'auto' }: AdSenseProps) {
   useEffect(() => {
     try {
       const adsbygoogle = (window as any).adsbygoogle || [];
@@ -24,7 +25,7 @@ export default function AdSense({ slot, className = '' }: AdSenseProps) {
         style={{ display: 'block' }}
         data-ad-client="ca-pub-1088654265590051"
         data-ad-slot={slot}
-        data-ad-format="auto"
+        data-ad-format={format}
         data-full-width-responsive="true"
       ></ins>
     </div>

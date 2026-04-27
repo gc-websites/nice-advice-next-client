@@ -74,7 +74,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
       <div className="flex flex-col justify-center items-center w-full md:w-[50vw] lg:w-[40vw]">
         {/* Mobile Ad - Mobile Only (Top) */}
-        <AdSense slot="6223090192" className="block md:hidden w-full mb-6" />
+        <AdSense slot="6223090192" className="block md:hidden w-full mb-6" format="horizontal" />
 
         <a href={amazonLink} target="_blank" rel="noopener noreferrer" className="w-full relative block">
           <img
