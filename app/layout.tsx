@@ -78,7 +78,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1088654265590051" crossOrigin="anonymous"></script>
+        <meta name="google-adsense-account" content="ca-pub-1088654265590051" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -114,6 +114,13 @@ export default async function RootLayout({
         />
       </head>
       <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || 'GTM-NZS7G3BL'} />
+      <Script
+        id="adsense-script"
+        async
+        strategy="afterInteractive"
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1088654265590051"
+        crossOrigin="anonymous"
+      />
       <body className={`antialiased ${merriweather.variable} ${poppins.variable}`}>
         <Script id="fb-pixel-init" strategy="afterInteractive" dangerouslySetInnerHTML={{
           __html: `

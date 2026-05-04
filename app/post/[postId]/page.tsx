@@ -13,6 +13,7 @@ import InfinitePost from '@/components/InfinitePost';
 import LiveViewerCount from '@/components/LiveViewerCount';
 import { SocketProvider } from '@/components/SocketProvider';
 import Comments from '@/components/Comments';
+import AdSense from '@/components/AdSense';
 
 export default async function Post({ params }: { params: { postId: string } }) {
   const { postId } = await params;
@@ -99,6 +100,13 @@ export default async function Post({ params }: { params: { postId: string } }) {
                 truncate={false}
               />
 
+              <AdSense
+                slot="6223090192"
+                className="my-6"
+                format="auto"
+                style={{ display: 'block', minHeight: 250 }}
+              />
+
               {post.paragraphs && post.paragraphs.map(
                 ({ id, subtitle, description, image, ads }) => (
                   <div key={id} className="pt-6 flex flex-col gap-4 relative">
@@ -136,6 +144,12 @@ export default async function Post({ params }: { params: { postId: string } }) {
           </div>
 
           <div className="flex flex-col gap-6 h-full">
+            <AdSense
+              slot="7699598053"
+              format="vertical"
+              fullWidthResponsive={false}
+              style={{ display: 'block', width: '100%', minHeight: 600 }}
+            />
             {relatedPostsList.slice(0, 4).map((rpost: any) => (
               <Link
                 key={rpost.documentId}

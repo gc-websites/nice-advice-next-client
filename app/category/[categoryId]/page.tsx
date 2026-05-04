@@ -11,6 +11,7 @@ import Disclaimer from '@/views/Disclaimer';
 import RenderDescription from '@/components/RenderDescription';
 import { SocketProvider } from '@/components/SocketProvider';
 import LiveViewerCount from '@/components/LiveViewerCount';
+import AdSense from '@/components/AdSense';
 
 export default async function Category({
   params,
@@ -76,6 +77,13 @@ export default async function Category({
               </div>
             </div>
 
+            <AdSense
+              slot="6223090192"
+              className="my-6"
+              format="auto"
+              style={{ display: 'block', minHeight: 250 }}
+            />
+
             <div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 h-full">
                 {posts?.map((post: any) => (
@@ -123,6 +131,13 @@ export default async function Category({
                 basePath={`/category/${categoryId}`}
               />
             )}
+
+            <AdSense
+              slot="6223090192"
+              className="my-6"
+              format="auto"
+              style={{ display: 'block', minHeight: 250 }}
+            />
           </div>
         </div>
       </section>
