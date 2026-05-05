@@ -1,319 +1,549 @@
 'use client';
 
-import { FC, FormEvent, useState, useRef, useEffect } from 'react';
-
-interface Comment {
-  username: string;
-  text: string;
-  createdAt?: string;
-}
-
-interface CommentsProps {
-  postId: string;
-  initialComments: Comment[];
-}
+import { FC, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import './Comments.css';
 
 const SERVER_URL =
   process.env.NODE_ENV === 'development'
     ? 'http://localhost:4000'
     : 'https://api.nice-advice.info';
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+const MAX_NAME = 40;
+const MAX_TEXT = 500;
+const PAGE_SIZE = 5;
+const STORAGE_KEY = 'na_commenter_name';
 
-function getInitials(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
+type CommentItem = {
+  username: string;
+  text: string;
+  createdAt?: string;
+  __key?: string;
+  __fresh?: boolean;
+};
 
-const PALETTE = [
-  ['#4BC8BE', '#28A99E'], // teal   (brand)
-  ['#8B5CF6', '#6D28D9'], // violet
-  ['#F59E0B', '#D97706'], // amber
-  ['#EF4444', '#DC2626'], // rose
-  ['#3B82F6', '#1D4ED8'], // blue
-  ['#10B981', '#059669'], // emerald
+const RELATIVE_FORMATTER =
+  typeof Intl !== 'undefined' && 'RelativeTimeFormat' in Intl
+    ? new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+    : null;
+
+const ABS_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: '2-digit',
+});
+
+const SHORT_DATE_WITH_YEAR = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: '2-digit',
+  year: 'numeric',
+});
+
+const parseTimestamp = (value: unknown): number | null => {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const t = new Date(trimmed).getTime();
+  if (!Number.isFinite(t) || t <= 0) return null;
+  const year2000 = 946684800000;
+  const yearAhead = Date.now() + 365 * 24 * 60 * 60 * 1000;
+  if (t < year2000 || t > yearAhead) return null;
+  return t;
+};
+
+const formatRelative = (iso: string, now: number) => {
+  const t = parseTimestamp(iso);
+  if (t === null) return '';
+  const diffSec = Math.round((t - now) / 1000);
+  const abs = Math.abs(diffSec);
+  if (abs < 45) return 'just now';
+  if (abs < 60 * 60) {
+    const m = Math.round(diffSec / 60);
+    return RELATIVE_FORMATTER
+      ? RELATIVE_FORMATTER.format(m, 'minute')
+      : `${Math.abs(m)}m ago`;
+  }
+  if (abs < 60 * 60 * 24) {
+    const h = Math.round(diffSec / 3600);
+    return RELATIVE_FORMATTER
+      ? RELATIVE_FORMATTER.format(h, 'hour')
+      : `${Math.abs(h)}h ago`;
+  }
+  if (abs < 60 * 60 * 24 * 7) {
+    const d = Math.round(diffSec / 86400);
+    return RELATIVE_FORMATTER
+      ? RELATIVE_FORMATTER.format(d, 'day')
+      : `${Math.abs(d)}d ago`;
+  }
+  const d = new Date(t);
+  return d.getFullYear() === new Date(now).getFullYear()
+    ? SHORT_DATE_FORMATTER.format(d)
+    : SHORT_DATE_WITH_YEAR.format(d);
+};
+
+const formatAbsolute = (iso: string) => {
+  const t = parseTimestamp(iso);
+  if (t === null) return '';
+  return ABS_FORMATTER.format(new Date(t));
+};
+
+const sortByCreatedDesc = (list: CommentItem[]) =>
+  [...list].sort((a, b) => {
+    const at = parseTimestamp(a.createdAt) ?? 0;
+    const bt = parseTimestamp(b.createdAt) ?? 0;
+    return bt - at;
+  });
+
+const AVATAR_GRADIENTS: Array<[string, string]> = [
+  ['#4BC8BE', '#039185'],
+  ['#7c3aed', '#4f46e5'],
+  ['#f59e0b', '#ef4444'],
+  ['#3b82f6', '#0ea5e9'],
+  ['#10b981', '#059669'],
+  ['#ec4899', '#db2777'],
+  ['#6366f1', '#8b5cf6'],
+  ['#14b8a6', '#0891b2'],
 ];
 
-function getAvatarGradient(name: string): string {
+const hashString = (str: string) => {
   let h = 0;
-  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
-  const [from, to] = PALETTE[Math.abs(h) % PALETTE.length];
-  return `linear-gradient(135deg, ${from}, ${to})`;
-}
-
-function formatDate(iso?: string): string {
-  if (!iso) return '';
-  try {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    }).format(new Date(iso));
-  } catch {
-    return '';
+  for (let i = 0; i < str.length; i += 1) {
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
   }
-}
+  return Math.abs(h);
+};
 
-// ── spinner ──────────────────────────────────────────────────────────────────
-function Spinner() {
+const getInitials = (name: string) => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+const Avatar: FC<{ name: string }> = ({ name }) => {
+  const [c1, c2] = AVATAR_GRADIENTS[hashString(name) % AVATAR_GRADIENTS.length];
   return (
-    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-    </svg>
+    <div
+      className="hfs-comments__avatar"
+      style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
+      aria-hidden="true"
+    >
+      {getInitials(name)}
+    </div>
   );
+};
+
+interface CommentsProps {
+  postId: string;
+  initialComments: CommentItem[];
 }
 
-// ── main component ────────────────────────────────────────────────────────────
 const Comments: FC<CommentsProps> = ({ postId, initialComments }) => {
-  const [comments, setComments] = useState<Comment[]>(
-    [...(initialComments || [])].sort((a, b) =>
-      new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
-    )
+  const [comments, setComments] = useState<CommentItem[]>(() =>
+    sortByCreatedDesc(initialComments || []),
   );
   const [username, setUsername] = useState('');
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-  const [open, setOpen] = useState(false);
-
-  const formRef = useRef<HTMLFormElement>(null);
-  const latestRef = useRef<HTMLDivElement>(null);
+  const [flash, setFlash] = useState(false);
+  const [freshKey, setFreshKey] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [now, setNow] = useState(() => Date.now());
+  const listRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (open) formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, [open]);
+    const id = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) setUsername(saved);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    setComments(sortByCreatedDesc(initialComments || []));
+  }, [initialComments]);
+
+  const count = comments.length;
+  const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  const pageItems = useMemo(
+    () => comments.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [comments, page],
+  );
+
+  const rangeFrom = count === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const rangeTo = Math.min(page * PAGE_SIZE, count);
+
+  const pageNumbers = useMemo<(number | '…')[]>(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const out: (number | '…')[] = [1];
+    const left = Math.max(2, page - 1);
+    const right = Math.min(totalPages - 1, page + 1);
+    if (left > 2) out.push('…');
+    for (let i = left; i <= right; i += 1) out.push(i);
+    if (right < totalPages - 1) out.push('…');
+    out.push(totalPages);
+    return out;
+  }, [page, totalPages]);
+
+  const goToPage = (p: number) => {
+    if (p < 1 || p > totalPages || p === page) return;
+    setPage(p);
+    if (listRef.current) {
+      const top =
+        listRef.current.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  };
+
+  const trimmedName = username.trim();
+  const trimmedText = text.trim();
+  const canSubmit =
+    !submitting &&
+    trimmedName.length >= 2 &&
+    trimmedName.length <= MAX_NAME &&
+    trimmedText.length >= 2 &&
+    trimmedText.length <= MAX_TEXT;
+
+  const charsLeft = MAX_TEXT - text.length;
+  const charsClass = useMemo(() => {
+    if (charsLeft < 0)
+      return 'hfs-comments__counter hfs-comments__counter--bad';
+    if (charsLeft < 40)
+      return 'hfs-comments__counter hfs-comments__counter--warn';
+    return 'hfs-comments__counter';
+  }, [charsLeft]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!username.trim() || !text.trim()) return;
-    setSubmitting(true);
+    if (!canSubmit) return;
     setError('');
-
+    setSubmitting(true);
     try {
       const res = await fetch(`${SERVER_URL}/comment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId, username: username.trim(), text: text.trim(), site: 'nice-advice' }),
+        body: JSON.stringify({
+          postId,
+          username: trimmedName,
+          text: trimmedText,
+          site: 'nice-advice',
+        }),
       });
-
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
         throw new Error(d.error || 'Failed to submit comment');
       }
-
-      const d = await res.json();
-      const newC = { ...d.comment, createdAt: d.comment.createdAt || new Date().toISOString() };
-      setComments((prev) => [newC, ...prev]);
+      try {
+        localStorage.setItem(STORAGE_KEY, trimmedName);
+      } catch {
+        /* ignore */
+      }
+      const key = `${Date.now()}-${Math.random()}`;
+      const createdAt = new Date().toISOString();
+      setComments((prev) => [
+        {
+          username: trimmedName,
+          text: trimmedText,
+          createdAt,
+          __key: key,
+          __fresh: true,
+        },
+        ...prev,
+      ]);
+      setFreshKey(key);
+      setPage(1);
       setText('');
-      setOpen(false);
-      setSuccess(true);
-      setTimeout(() => { setSuccess(false); latestRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 2200);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong. Try again.');
+      setFlash(true);
+      setTimeout(() => setFlash(false), 1800);
+      setTimeout(() => setFreshKey(null), 2400);
+    } catch (err) {
+      const e = err as { message?: string };
+      setError(e?.message || 'Could not send your comment. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <section className="w-full mt-12 pt-8 border-t border-gray-100 dark:border-gray-700/60">
-
-      {/* ── Header row ────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <svg className="w-5 h-5 text-main shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2h2m10-4H7a2 2 0 00-2 2v4h14V6a2 2 0 00-2-2z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01" />
-          </svg>
-          <h2 className="font-merriweather text-xl font-bold text-mainText dark:text-white">
-            Discussion
-            {comments.length > 0 && (
-              <span className="ml-2 text-sm font-normal font-poppins text-additionalText dark:text-gray-400">
-                · {comments.length} {comments.length === 1 ? 'comment' : 'comments'}
-              </span>
-            )}
-          </h2>
-        </div>
-
-        <button
-          id="open-comment-form-btn"
-          onClick={() => { setOpen((v) => !v); setError(''); }}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-main text-white hover:bg-main2 active:scale-[.97] transition-all duration-150 shadow-sm shadow-main/30 dark:shadow-main/10 cursor-pointer"
-        >
-          {open ? (
-            <>
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    <section
+      className="hfs-comments container py-8"
+      aria-labelledby="na-comments-title"
+    >
+      <div className="hfs-comments__card">
+        <header className="hfs-comments__header">
+          <div className="hfs-comments__headerLeft">
+            <span className="hfs-comments__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                <path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
-              Cancel
-            </>
-          ) : (
-            <>
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              Add comment
-            </>
+            </span>
+            <h3
+              id="na-comments-title"
+              className="hfs-comments__title section__title"
+            >
+              Discussion
+            </h3>
+            <span className="hfs-comments__count">{count}</span>
+          </div>
+          {flash && (
+            <span className="hfs-comments__flash" role="status">
+              ✓ Posted
+            </span>
           )}
-        </button>
-      </div>
+        </header>
 
-      {/* ── Success banner ───────────────────────────────────────── */}
-      {success && (
-        <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/40 text-emerald-700 dark:text-emerald-300 text-sm font-medium">
-          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-          Comment posted! Thanks for sharing your thoughts.
-        </div>
-      )}
-
-      {/* ── Inline form ─────────────────────────────────────────── */}
-      {open && (
-        <form
-          ref={formRef}
-          onSubmit={handleSubmit}
-          className="mb-8 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700/60 bg-white dark:bg-gray-800/50 shadow-sm"
-        >
-          {/* top accent line */}
-          <div className="h-0.5 bg-gradient-to-r from-main via-main2 to-main3" />
-
-          <div className="p-5 sm:p-6 flex flex-col gap-4">
-            {/* error */}
-            {error && (
-              <div className="flex items-start gap-2.5 px-4 py-3 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-700/40 text-rose-600 dark:text-rose-400 text-sm">
-                <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {error}
+        <form className="hfs-comments__form" onSubmit={handleSubmit} noValidate>
+          <div className="hfs-comments__formRow">
+            <Avatar name={trimmedName || '?'} />
+            <div className="hfs-comments__fields">
+              <input
+                type="text"
+                className="hfs-comments__input"
+                placeholder="Your name"
+                value={username}
+                maxLength={MAX_NAME}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={submitting}
+                aria-label="Your name"
+              />
+              <textarea
+                className="hfs-comments__textarea"
+                placeholder="Share your thoughts on this article…"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={3}
+                maxLength={MAX_TEXT + 80}
+                disabled={submitting}
+                aria-label="Your comment"
+              />
+              <div className="hfs-comments__formFooter">
+                <span className={charsClass}>
+                  {Math.max(charsLeft, 0)} characters left
+                </span>
+                <button
+                  type="submit"
+                  className="hfs-comments__submit"
+                  disabled={!canSubmit}
+                >
+                  {submitting ? (
+                    <>
+                      <span
+                        className="hfs-comments__spinner"
+                        aria-hidden="true"
+                      />
+                      Posting…
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M22 2 11 13"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M22 2 15 22l-4-9-9-4 20-7z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      Post comment
+                    </>
+                  )}
+                </button>
               </div>
-            )}
-
-            {/* name + textarea in a nice grid on sm+ */}
-            <div className="grid sm:grid-cols-[1fr_2fr] gap-4 items-start">
-              {/* name */}
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="comment-username" className="text-xs font-semibold uppercase tracking-wider text-additionalText dark:text-gray-400">
-                  Your name
-                </label>
-                <input
-                  id="comment-username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  maxLength={100}
-                  autoComplete="nickname"
-                  placeholder="Jane Doe"
-                  className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-600 text-mainText dark:text-white placeholder-gray-400 dark:placeholder-gray-600 outline-none focus:ring-2 focus:ring-main/50 focus:border-main transition-all"
-                />
-              </div>
-
-              {/* text */}
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="comment-text" className="text-xs font-semibold uppercase tracking-wider text-additionalText dark:text-gray-400">
-                  Comment
-                </label>
-                <textarea
-                  id="comment-text"
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  required
-                  maxLength={2000}
-                  rows={3}
-                  placeholder="Share your thoughts on this article…"
-                  className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-600 text-mainText dark:text-white placeholder-gray-400 dark:placeholder-gray-600 outline-none focus:ring-2 focus:ring-main/50 focus:border-main transition-all resize-none leading-relaxed"
-                />
-              </div>
-            </div>
-
-            {/* footer */}
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-xs text-additionalText dark:text-gray-500 font-poppins">
-                {text.length > 0 && <>{2000 - text.length} characters left</>}
-              </span>
-              <button
-                id="submit-comment-btn"
-                type="submit"
-                disabled={submitting || !username.trim() || !text.trim()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-main hover:bg-main2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[.97] transition-all duration-150 shadow-md shadow-main/25"
-              >
-                {submitting ? <><Spinner /> Posting…</> : <>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                  Post comment
-                </>}
-              </button>
+              {error && (
+                <p className="hfs-comments__error" role="alert">
+                  {error}
+                </p>
+              )}
             </div>
           </div>
         </form>
-      )}
 
-      {/* ── Comment list ─────────────────────────────────────────── */}
-      {comments.length === 0 ? (
-        /* empty state */
-        <div className="flex flex-col items-center gap-4 py-14 text-center">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-            <svg className="w-6 h-6 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
+        <div className="hfs-comments__divider" />
+
+        {count === 0 ? (
+          <div className="hfs-comments__empty">
+            <div className="hfs-comments__emptyIcon" aria-hidden="true">
+              💬
+            </div>
+            <p className="hfs-comments__emptyTitle">No comments yet</p>
+            <p className="hfs-comments__emptyText">
+              Be the first to share your thoughts on this article.
+            </p>
           </div>
-          <div>
-            <p className="font-semibold text-mainText dark:text-white text-sm">No comments yet</p>
-            <p className="text-sm text-additionalText dark:text-gray-400 mt-0.5">Be the first to share your opinion!</p>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-700/50">
-          {comments.map((c, i) => {
-            const isLatest = i === comments.length - 1;
-            return (
-              <div
-                key={i}
-                ref={isLatest ? latestRef : undefined}
-                className="flex items-start gap-3 sm:gap-4 py-5 group"
+        ) : (
+          <div ref={listRef}>
+            <div className="hfs-comments__rangeLabel">
+              Showing <strong>{rangeFrom}</strong>–<strong>{rangeTo}</strong> of{' '}
+              <strong>{count}</strong> · newest first
+            </div>
+            <ul className="hfs-comments__list">
+              {pageItems.map((c, idx) => {
+                const key = c.__key || `${c.username}-${idx}-p${page}`;
+                const isFresh = c.__key && c.__key === freshKey;
+                const validTs = parseTimestamp(c.createdAt);
+                const relative = validTs
+                  ? formatRelative(c.createdAt!, now)
+                  : '';
+                const absolute = validTs ? formatAbsolute(c.createdAt!) : '';
+                return (
+                  <li
+                    key={key}
+                    className={`hfs-comments__item${isFresh ? ' hfs-comments__item--fresh' : ''}`}
+                  >
+                    <Avatar name={c.username} />
+                    <div className="hfs-comments__body">
+                      <div className="hfs-comments__meta">
+                        <span className="hfs-comments__author">
+                          {c.username}
+                        </span>
+                        {relative && (
+                          <>
+                            <span
+                              className="hfs-comments__metaDot"
+                              aria-hidden="true"
+                            >
+                              ·
+                            </span>
+                            <time
+                              className="hfs-comments__time"
+                              dateTime={c.createdAt}
+                              title={absolute}
+                            >
+                              {relative}
+                            </time>
+                          </>
+                        )}
+                      </div>
+                      <p className="hfs-comments__text">{c.text}</p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {totalPages > 1 && (
+              <nav
+                className="hfs-comments__pager"
+                aria-label="Comments pagination"
               >
-                {/* avatar */}
-                <div
-                  className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm select-none"
-                  style={{ background: getAvatarGradient(c.username) }}
+                <button
+                  type="button"
+                  className="hfs-comments__pagerBtn hfs-comments__pagerBtn--arrow"
+                  onClick={() => goToPage(page - 1)}
+                  disabled={page === 1}
+                  aria-label="Previous page"
                 >
-                  {getInitials(c.username)}
-                </div>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M15 18l-6-6 6-6"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span className="hfs-comments__pagerLabel">Prev</span>
+                </button>
 
-                {/* bubble */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                    <span className="text-sm font-bold text-mainText dark:text-white font-poppins">
-                      {c.username}
+                {pageNumbers.map((p, i) =>
+                  p === '…' ? (
+                    <span
+                      key={`gap-${i}`}
+                      className="hfs-comments__pagerGap"
+                      aria-hidden="true"
+                    >
+                      …
                     </span>
-                    {isLatest && success && (
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-main/10 dark:bg-main/20 text-main font-semibold">
-                        just now
-                      </span>
-                    )}
-                    {c.createdAt && !( isLatest && success) && (
-                      <span className="text-[11px] text-additionalText dark:text-gray-500 font-poppins">
-                        {formatDate(c.createdAt)}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm font-poppins text-additionalText dark:text-gray-300 leading-relaxed whitespace-pre-wrap break-words">
-                    {c.text}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+                  ) : (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => goToPage(p as number)}
+                      className={`hfs-comments__pagerBtn${
+                        p === page ? ' hfs-comments__pagerBtn--active' : ''
+                      }`}
+                      aria-current={p === page ? 'page' : undefined}
+                    >
+                      {p}
+                    </button>
+                  ),
+                )}
+
+                <button
+                  type="button"
+                  className="hfs-comments__pagerBtn hfs-comments__pagerBtn--arrow"
+                  onClick={() => goToPage(page + 1)}
+                  disabled={page === totalPages}
+                  aria-label="Next page"
+                >
+                  <span className="hfs-comments__pagerLabel">Next</span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M9 6l6 6-6 6"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </nav>
+            )}
+          </div>
+        )}
+      </div>
     </section>
   );
 };

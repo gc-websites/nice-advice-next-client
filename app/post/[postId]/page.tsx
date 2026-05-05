@@ -136,11 +136,6 @@ export default async function Post({ params }: { params: { postId: string } }) {
               )}
             </div>
 
-            {/* Comments section */}
-            <Comments
-              postId={postId}
-              initialComments={post.comments || []}
-            />
           </div>
 
           <div className="flex flex-col gap-6 h-full">
@@ -205,6 +200,11 @@ export default async function Post({ params }: { params: { postId: string } }) {
             ))}
           </div>
         </section>
+
+        <Comments
+          postId={postId}
+          initialComments={post.comments || []}
+        />
 
         <Disclaimer />
 
