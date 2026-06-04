@@ -6,12 +6,10 @@ import TrackedCTALink from '@/components/TrackedCTALink';
 import RobotGate from '@/components/RobotGate';
 
 // ---------------------------------------------------------------------------
-// CTA destination. Leave as '#' for now — the button still tracks clicks and
-// forwards every incoming ?utm_* param automatically (see TrackedCTALink).
-// When you have the real offer/affiliate link, just paste it here:
-//   const OFFER_URL = 'https://your-offer-link.example/...';
+// CTA destination — the offer (review) page. Incoming ?utm_* params are
+// forwarded automatically (see TrackedCTALink), and the click is tracked.
 // ---------------------------------------------------------------------------
-const OFFER_URL = '#'; // TODO: вставить ссылку оффера
+const OFFER_URL = '/en/o/digital-marketing';
 
 const LOCALE = 'en' as const;
 const PRELEND_SLUG = 'digital-marketing';
@@ -52,7 +50,7 @@ export default function DigitalMarketingPrelandPage() {
 
           <figure className="mb-8">
             <Image
-              src="/assets/img/1d367c4d-eed6-4332-ac83-7c0951f8c219.png"
+              src="/assets/img/d26c2aae-dcfe-425e-b25b-baebd8dca307.png"
               alt="Online digital marketing degree — your guide to mastering digital marketing"
               width={1774}
               height={887}

@@ -8,9 +8,10 @@ export default function CookieConsent() {
   const pathname = usePathname();
   const [showConsent, setShowConsent] = useState(false);
 
-  // Don't show the cookie banner on ad pre-lander routes (…/v/…) —
-  // it hurts conversion on paid landing pages.
-  const isPrelander = pathname?.split('/').includes('v') ?? false;
+  // Don't show the cookie banner on ad funnel routes (…/v/… pre-landers and
+  // …/o/… offer pages) — it hurts conversion on paid landing pages.
+  const segments = pathname?.split('/') ?? [];
+  const isPrelander = segments.includes('v') || segments.includes('o');
 
   useEffect(() => {
     if (isPrelander) return;
