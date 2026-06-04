@@ -7,6 +7,7 @@ import Image from 'next/image';
 import dot from '@/public/assets/svg/dot.svg';
 
 import Loader from '../components/Loader';
+import PostCover from '../components/PostCover';
 import RenderDescription from '../components/RenderDescription';
 import AdList from '../components/AdList';
 import { notFound } from 'next/navigation';
@@ -116,15 +117,13 @@ const InfinitePost = ({ postIds }: { postIds: string[] }) => {
               </span>
 
               <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
-                {post.image?.url && (
-                  <Image
-                    src={post.image.url}
-                    alt={post.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 70vw"
-                    className="object-cover object-center"
-                  />
-                )}
+                <PostCover
+                  image={post.image}
+                  title={post.title}
+                  sizes="(max-width: 768px) 100vw, 70vw"
+                  size="lg"
+                  hover={false}
+                />
               </div>
 
               <div className="mt-6 flex flex-col gap-4 pb-4">
@@ -148,8 +147,8 @@ const InfinitePost = ({ postIds }: { postIds: string[] }) => {
                         truncate={false}
                       />
                       {/* <AdList ads={ads} /> */}
-                      <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
-                        {image?.url && (
+                      {image?.url && (
+                        <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
                           <Image
                             src={image.url}
                             alt={subtitle}
@@ -157,8 +156,8 @@ const InfinitePost = ({ postIds }: { postIds: string[] }) => {
                             sizes="(max-width: 768px) 100vw, 70vw"
                             className="object-cover object-center"
                           />
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   ),
                 )}
@@ -214,15 +213,12 @@ const InfinitePost = ({ postIds }: { postIds: string[] }) => {
                     </p>
                   </div>
                   <div className="w-full aspect-[4/3] overflow-hidden rounded-lg mb-3 relative bg-gray-100 dark:bg-gray-800">
-                      {post.image?.url && (
-                        <Image
-                          src={post.image.url}
-                          alt={post.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-cover object-center transform group-hover:scale-105 transition duration-300"
-                        />
-                      )}
+                    <PostCover
+                      image={post.image}
+                      title={post.title}
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      size="md"
+                    />
                   </div>
                   <div className="flex flex-col gap-2 flex-grow">
                     <LiveViewerCount documentId={post.documentId} />

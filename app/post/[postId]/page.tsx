@@ -9,6 +9,7 @@ import Disclaimer from '@/views/Disclaimer';
 // import HorizontalAdBanner from '@/views/HorizontalAdBanner';
 import RenderDescription from '@/components/RenderDescription';
 // import AdList from '@/components/AdList';
+import PostCover from '@/components/PostCover';
 import InfinitePost from '@/components/InfinitePost';
 import LiveViewerCount from '@/components/LiveViewerCount';
 import { SocketProvider } from '@/components/SocketProvider';
@@ -80,17 +81,14 @@ export default async function Post({ params }: { params: { postId: string } }) {
             </span>
 
             <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
-              {post.image?.url && (
-                <Image
-                  src={post.image?.formats?.medium?.url || post.image?.formats?.large?.url || post.image.url}
-                  alt={post.title}
-                  fill
-                  priority
-                  fetchPriority="high"
-                  sizes="(max-width: 768px) 100vw, 70vw"
-                  className="object-cover object-center transform"
-                />
-              )}
+              <PostCover
+                image={post.image}
+                title={post.title}
+                sizes="(max-width: 768px) 100vw, 70vw"
+                priority
+                size="lg"
+                hover={false}
+              />
             </div>
 
             <div className="mt-6 flex flex-col gap-4 pb-4">
@@ -172,15 +170,12 @@ export default async function Post({ params }: { params: { postId: string } }) {
                   </p>
                 </div>
                 <div className="w-full aspect-[4/3] overflow-hidden rounded-lg mb-3 relative bg-gray-100 dark:bg-gray-800">
-                  {rpost.image?.url && (
-                    <Image
-                      src={rpost.image?.formats?.medium?.url || rpost.image?.formats?.small?.url || rpost.image.url}
-                      alt={rpost.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 30vw"
-                      className="object-cover object-center transform group-hover:scale-105 transition duration-300"
-                    />
-                  )}
+                  <PostCover
+                    image={rpost.image}
+                    title={rpost.title}
+                    sizes="(max-width: 768px) 100vw, 30vw"
+                    size="md"
+                  />
                 </div>
                 <div className="flex flex-col gap-2 flex-grow">
                   <LiveViewerCount documentId={rpost.documentId} />

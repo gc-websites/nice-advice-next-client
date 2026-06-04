@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import dot from '@/public/assets/svg/dot.svg';
 import RenderDescription from '../components/RenderDescription';
+import PostCover from '../components/PostCover';
 
 interface HeroProps {
   popularPosts: any[];
@@ -47,17 +48,13 @@ const Hero = ({ popularPosts }: HeroProps) => {
               </p>
             </div>
             <div className="w-full aspect-[4/3] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 relative">
-              {popularPosts[0].image?.url && (
-                <Image
-                  src={popularPosts[0].image?.formats?.medium?.url || popularPosts[0].image?.formats?.large?.url || popularPosts[0].image.url}
-                  alt={popularPosts[0].title}
-                  fill
-                  priority
-                  fetchPriority="high"
-                  sizes="(max-width: 768px) 100vw, 70vw"
-                  className="object-cover object-center transform group-hover:scale-105 transition duration-300"
-                />
-              )}
+              <PostCover
+                image={popularPosts[0].image}
+                title={popularPosts[0].title}
+                sizes="(max-width: 768px) 100vw, 70vw"
+                priority
+                size="lg"
+              />
             </div>
             <div className="mt-6 flex flex-col gap-4 pb-4">
               <h2 className="section__title text-3xl text-mainText dark:text-white">
@@ -108,15 +105,12 @@ const Hero = ({ popularPosts }: HeroProps) => {
                   </p>
                 </div>
                 <div className="w-full aspect-[4/3] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 relative">
-                  {post.image?.url && (
-                    <Image
-                      src={post.image?.formats?.medium?.url || post.image?.formats?.small?.url || post.image.url}
-                      alt={post.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 30vw"
-                      className="object-cover object-center transform group-hover:scale-105 transition duration-300"
-                    />
-                  )}
+                  <PostCover
+                    image={post.image}
+                    title={post.title}
+                    sizes="(max-width: 768px) 100vw, 30vw"
+                    size="md"
+                  />
                 </div>
                 <div className="mt-3 flex flex-col gap-2">
                   <h3 className="section__title text-lg text-mainText dark:text-white">

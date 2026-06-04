@@ -1,24 +1,31 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 
 export default function CookieConsent() {
+  const pathname = usePathname();
   const [showConsent, setShowConsent] = useState(false);
 
+  // Don't show the cookie banner on ad pre-lander routes (…/v/…) —
+  // it hurts conversion on paid landing pages.
+  const isPrelander = pathname?.split('/').includes('v') ?? false;
+
   useEffect(() => {
+    if (isPrelander) return;
     const hasConsented = Cookies.get('cookie_consent');
     if (!hasConsented) {
       setShowConsent(true);
     }
-  }, []);
+  }, [isPrelander]);
 
   const handleAccept = () => {
     Cookies.set('cookie_consent', 'true', { expires: 365 });
     setShowConsent(false);
   };
 
-  if (!showConsent) return null;
+  if (isPrelander || !showConsent) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#000000] p-4 shadow-lg text-white">

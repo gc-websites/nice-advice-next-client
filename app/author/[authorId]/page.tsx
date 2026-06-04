@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { getAuthor, getPostsByAuthor } from '@/services/postsAPI';
 import { notFound } from 'next/navigation';
 import RenderDescription from '@/components/RenderDescription';
+import PostCover from '@/components/PostCover';
 import Pagination from '@/components/Pagination';
 
 export default async function Author({
@@ -87,15 +88,12 @@ export default async function Author({
                 className="group p-4 hover:shadow-lg rounded-lg bg-white dark:bg-additionalText transition duration-300 flex flex-col"
               >
                 <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
-                  {post.image?.url && (
-                    <Image
-                      src={post.image.url}
-                      alt={post.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover object-center transform group-hover:scale-105 transition duration-300"
-                    />
-                  )}
+                  <PostCover
+                    image={post.image}
+                    title={post.title}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    size="md"
+                  />
                 </div>
                 <div className="mt-3 flex flex-col gap-4 flex-grow">
                   <h3 className="section__title text-2xl md:text-3xl text-mainText dark:text-white">

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getSearchedPosts } from '@/services/postsAPI';
 import Pagination from '@/components/Pagination';
+import PostCover from '@/components/PostCover';
 import RenderDescription from '@/components/RenderDescription';
 
 export default async function Search({
@@ -41,11 +42,12 @@ export default async function Search({
                   href={`/post/${post.documentId}`}
                   className="group p-4 hover:shadow-lg rounded-lg bg-white dark:bg-additionalText transition duration-300 flex flex-col"
                 >
-                  <div className="w-full aspect-[4/3] overflow-hidden rounded-lg">
-                    <img
-                      src={post.image?.url}
-                      alt={post.title}
-                      className="w-full h-full object-cover object-center transform group-hover:scale-105 transition duration-300"
+                  <div className="w-full aspect-[4/3] overflow-hidden rounded-lg relative bg-gray-100 dark:bg-gray-800">
+                    <PostCover
+                      image={post.image}
+                      title={post.title}
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      size="md"
                     />
                   </div>
                   <div className="mt-3 flex flex-col gap-4">
