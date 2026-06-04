@@ -46,9 +46,9 @@ export default function DigitalMarketingOfferPage() {
       {/* fire prelend_view + persist utm params */}
       <ClickTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} eventType="prelend_view" />
 
-      {/* Top banner ad — full width above the content */}
+      {/* Top banner ad — na_o_top */}
       <div className="max-w-[1100px] mx-auto px-4 mb-8">
-        <AdSlot slot="6223090192" />
+        <AdSlot slot="9081217047" />
       </div>
 
       <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,6 +84,10 @@ export default function DigitalMarketingOfferPage() {
                   Southern New Hampshire University (SNHU) — what the program offers, how online study works, and how
                   to decide whether it fits your goals and budget.
                 </p>
+
+                {/* Ad — na_o_mid1 (after the first paragraph) */}
+                <AdSlot slot="8220091745" />
+
                 <p>
                   We break down the format, what you study, tuition and aid, the real pros and cons, and the exact
                   steps to enroll — so you can make a confident, informed decision.
@@ -95,7 +99,8 @@ export default function DigitalMarketingOfferPage() {
                 </ul>
               </div>
 
-              <AdSlot slot="6223090192" />
+              {/* Ad — na_o_mid2 (after the intro block) */}
+              <AdSlot slot="3800970206" />
 
               <Section id="format" title="Format & how online learning works">
                 <p>
@@ -205,8 +210,6 @@ export default function DigitalMarketingOfferPage() {
                   </div>
                 </div>
               </Section>
-
-              <AdSlot slot="6223090192" />
 
               <Section id="tools" title="Skills & tools you build">
                 <p>The program emphasizes practical, employer-ready skills and the tools used across the industry.</p>

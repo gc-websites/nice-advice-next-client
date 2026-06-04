@@ -45,8 +45,8 @@ export default function DigitalMarketingPrelandPage() {
             </div>
           </header>
 
-          {/* Top ad */}
-          <AdSlot slot="6223090192" />
+          {/* Top ad — na_v_top */}
+          <AdSlot slot="4020462057" />
 
           <figure className="mb-8">
             <Image
@@ -143,9 +143,6 @@ export default function DigitalMarketingPrelandPage() {
           <div className="mb-10">
             <CTAButton />
           </div>
-
-          {/* Mid ad */}
-          <AdSlot slot="6223090192" />
 
           <hr className="border-[#e5e7eb] dark:border-white/10 mb-10" />
 
