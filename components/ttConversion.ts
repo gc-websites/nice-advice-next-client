@@ -96,3 +96,51 @@ export function getTtConversion(): Record<string, string> | null {
 
   return out;
 }
+
+/**
+ * Fire the TikTok conversion ONCE per session (browser pixel via ttq.track) and
+ * return the fields the server needs to mirror it via the Events API (same
+ * event name + event_id → dedup). Returns null if this is not a TikTok campaign
+ * or the conversion already fired this session.
+ *
+ * Trigger: the first ad view on the prelander (see TrackedAdSlot) — mirrors the
+ * competitor's "ad viewed" conversion rather than firing on the CTA click.
+ */
+export function fireTikTokConversionOnce(): Record<string, string> | null {
+  const conv = getTtConversion();
+  if (!conv) return null;
+
+  const store = ss();
+  try {
+    if (store?.getItem('na_tt_converted')) return null;
+  } catch {
+    /* ignore */
+  }
+  try {
+    store?.setItem('na_tt_converted', '1');
+  } catch {
+    /* ignore */
+  }
+
+  try {
+    const props: Record<string, unknown> = {};
+    if (conv.tt_value) {
+      const v = Number(conv.tt_value);
+      if (!Number.isNaN(v)) props.value = v;
+    }
+    if (conv.tt_currency) props.currency = conv.tt_currency;
+    if (conv.tt_content_id) {
+      props.content_id = conv.tt_content_id;
+      props.content_type = 'product';
+    }
+    (window as unknown as { ttq?: { track?: (...a: unknown[]) => void } }).ttq?.track?.(
+      conv.tt_event,
+      props,
+      { event_id: conv.tt_event_id }
+    );
+  } catch {
+    /* ignore */
+  }
+
+  return conv;
+}

@@ -1,29 +1,20 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { getOrCreateTtEventId, getTtclid } from './ttConversion';
+import { useEffect } from 'react';
+import { getTtclid } from './ttConversion';
 
 /**
  * Campaign pixel — TikTok.
  *
- * Replicates the competitor's URL-parameter–driven pixel approach, for TikTok:
- * the ad URL carries the pixel id + event, the page loads the TikTok pixel and
- * fires the conversion event on the first CTA click (the /v/ "Get started"
- * button that sends the user to the offer page).
+ * On the prelander it loads the TikTok pixel (+ Pageview) and persists the
+ * tt_* campaign params + ttclid in sessionStorage.
  *
- * Uses TikTok-specific `tt_*` URL params (NOT the bare `pixel`/`event`, which
- * are already reserved for the Facebook pixel in this codebase — sharing them
- * would make ClickTracker fire a spurious FB event).
+ * The CONVERSION is NOT fired here. It is fired on the first ad view
+ * (see TrackedAdSlot → fireTikTokConversionOnce) to mirror the competitor's
+ * "ad viewed" conversion instead of firing on the CTA click.
  *
- * Campaign URL contract (only `tt_pixel` is required):
- *   ?tt_pixel=Cxxxxxxxxx       // TikTok Pixel ID (required to do anything)
- *   &tt_event=CompletePayment   // event name (default: CompletePayment)
- *   &tt_fire=click              // "click" = on first CTA click (default) | "load"
- *   &tt_value=1&tt_currency=USD // optional, for value-based optimization
- *   &tt_content_id=digital-marketing
- *
- * Params are persisted in sessionStorage so they survive client navigation,
- * and the conversion is fired at most once per session.
+ * Campaign URL contract (only tt_pixel is required):
+ *   ?platform=tiktok&tt_pixel=Cxxxxxxxxx&tt_event=CompletePayment&tt_content_id=digital-marketing
  */
 
 declare global {
@@ -33,17 +24,14 @@ declare global {
   }
 }
 
-const CTA_SELECTOR = '[class*="cta"], a[data-cta]';
-
 export default function CampaignPixel() {
-  const fired = useRef(false);
-
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const params = new URLSearchParams(window.location.search);
 
-    // Read a param from the URL, falling back to (and persisting in) sessionStorage.
+    // Read a param from the URL, persisting it in sessionStorage so the
+    // conversion (fired later on ad view) and the server can read it.
     const get = (key: string, storeKey: string): string => {
       const v = params.get(key);
       if (v) {
@@ -62,65 +50,16 @@ export default function CampaignPixel() {
     };
 
     const pixel = get('tt_pixel', 'na_tt_pixel');
-    if (!pixel) return; // no TikTok campaign pixel → nothing to do
+    if (!pixel) return; // not a TikTok campaign → nothing to do
 
-    const event = get('tt_event', 'na_tt_event') || 'CompletePayment';
-    const fire = (get('tt_fire', 'na_tt_fire') || 'click').toLowerCase();
-    const value = get('tt_value', 'na_tt_value');
-    const currency = get('tt_currency', 'na_tt_currency');
-    const contentId = get('tt_content_id', 'na_tt_content_id');
+    // Persist the rest so fireTikTokConversionOnce() can build the event later.
+    get('tt_event', 'na_tt_event');
+    get('tt_value', 'na_tt_value');
+    get('tt_currency', 'na_tt_currency');
+    get('tt_content_id', 'na_tt_content_id');
 
     loadTikTok(pixel); // loads SDK + fires Pageview (ttq.page)
-    getTtclid(); // capture & persist ttclid for the server-side Events API event
-
-    const properties: Record<string, unknown> = {};
-    if (value && !Number.isNaN(Number(value))) properties.value = Number(value);
-    if (currency) properties.currency = currency;
-    if (contentId) {
-      properties.content_id = contentId;
-      properties.content_type = 'product';
-    }
-
-    const fireConversion = () => {
-      if (fired.current) return;
-      try {
-        if (sessionStorage.getItem('na_tt_converted')) {
-          fired.current = true;
-          return;
-        }
-      } catch {
-        /* ignore */
-      }
-      fired.current = true;
-      try {
-        sessionStorage.setItem('na_tt_converted', '1');
-      } catch {
-        /* ignore */
-      }
-      // Shared event_id so the browser pixel and the server Events API event dedupe.
-      const eventId = getOrCreateTtEventId();
-      try {
-        window.ttq?.track?.(event, properties, { event_id: eventId });
-      } catch {
-        /* ignore */
-      }
-    };
-
-    if (fire === 'load') {
-      fireConversion();
-      return;
-    }
-
-    // Default: fire on the first CTA click (capture phase, before navigation).
-    const onClick = (ev: MouseEvent) => {
-      const target = ev.target as Element | null;
-      if (!target || !target.closest) return;
-      if (!target.closest(CTA_SELECTOR)) return;
-      fireConversion();
-      document.removeEventListener('click', onClick, true);
-    };
-    document.addEventListener('click', onClick, true);
-    return () => document.removeEventListener('click', onClick, true);
+    getTtclid(); // capture & persist ttclid for the conversion + server-side event
   }, []);
 
   return null;

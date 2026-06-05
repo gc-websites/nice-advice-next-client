@@ -3,21 +3,26 @@
 import { useEffect, useRef } from 'react';
 import AdSense from './AdSense';
 import { trackEvent } from './track';
+import { fireTikTokConversionOnce } from './ttConversion';
 
 /**
  * Funnel ad slot: renders an AdSense unit (with label + auto-hide when unfilled)
- * and fires a single `ad_view` event when the unit scrolls into view — so the
- * journey records which ads each user actually saw. Used only on funnel pages,
- * not site-wide, to avoid noise.
+ * and fires a single `ad_view` event when the unit scrolls into view.
+ *
+ * When `conversion` is set (the prelander's top ad), the first view ALSO fires
+ * the TikTok conversion (browser + server, deduped) — mirroring the competitor's
+ * "ad viewed" conversion. Used only on funnel pages, not site-wide.
  */
 export default function TrackedAdSlot({
   slot,
   locale,
   prelendSlug,
+  conversion = false,
 }: {
   slot: string;
   locale: 'en' | 'fr' | 'es';
   prelendSlug: string;
+  conversion?: boolean;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const fired = useRef(false);
@@ -32,8 +37,19 @@ export default function TrackedAdSlot({
           if (entry.isIntersecting && !fired.current) {
             fired.current = true;
             const ins = el.querySelector('ins.adsbygoogle');
-            const status = ins?.getAttribute('data-ad-status') || 'unknown';
-            trackEvent('ad_view', { locale, prelendSlug, meta: { slot, ad_status: status } });
+            const status = ins?.getAttribute('data-ad-status') || '';
+
+            // On the conversion ad, fire the TikTok conversion on view — unless the
+            // unit explicitly returned no ad. Returns the fields the server forwards.
+            const tt =
+              conversion && status !== 'unfilled' ? fireTikTokConversionOnce() : null;
+
+            trackEvent('ad_view', {
+              locale,
+              prelendSlug,
+              meta: { slot, ad_status: status, conversion: conversion || undefined },
+              extra: tt || undefined,
+            });
             io.disconnect();
           }
         }
@@ -42,7 +58,7 @@ export default function TrackedAdSlot({
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [slot, locale, prelendSlug]);
+  }, [slot, locale, prelendSlug, conversion]);
 
   return (
     <div

@@ -53,8 +53,8 @@ export default function DigitalMarketingPrelandPage() {
             </div>
           </header>
 
-          {/* Top ad — na_v_top */}
-          <TrackedAdSlot slot="4020462057" locale={LOCALE} prelendSlug={PRELEND_SLUG} />
+          {/* Top ad — na_v_top — fires the TikTok conversion on first view */}
+          <TrackedAdSlot slot="4020462057" locale={LOCALE} prelendSlug={PRELEND_SLUG} conversion />
 
           <figure className="mb-8">
             <Image

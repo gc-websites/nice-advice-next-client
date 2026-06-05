@@ -9,7 +9,6 @@
 // full user path can be reconstructed by session_id + sequence/ms_since_start.
 
 import { sendGTMEvent } from '@next/third-parties/google';
-import { getTtConversion } from './ttConversion';
 
 const TRACKING_API = 'https://api.nice-advice.info/track-click';
 
@@ -156,8 +155,6 @@ function sendPayload(data: Record<string, unknown>) {
 export function trackEvent(eventType: TrackEventType, opts: TrackOpts) {
   if (typeof window === 'undefined') return;
 
-  const tt = eventType === 'cta_click' ? getTtConversion() : null;
-
   const data: Record<string, unknown> = {
     session_id: getSessionId(),
     event_type: eventType,
@@ -174,7 +171,6 @@ export function trackEvent(eventType: TrackEventType, opts: TrackOpts) {
     ms_since_start: msSinceStart(),
     clicked_at: new Date().toISOString(),
     ...getTrackingParams(),
-    ...(tt || {}),
     ...(opts.extra || {}),
   };
   if (opts.meta) data.meta = opts.meta;
