@@ -42,6 +42,20 @@ function ss(): Storage | null {
 export function getSessionId(): string {
   const store = ss();
   try {
+    // Adopt the cross-domain session id forwarded from the hairstyles captcha (na_sid),
+    // so the journey across both domains shares one session_id.
+    const fromUrl =
+      typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('na_sid')
+        : null;
+    if (fromUrl) {
+      try {
+        store?.setItem('na_session_id', fromUrl);
+      } catch {
+        /* ignore */
+      }
+      return fromUrl;
+    }
     let sid = store?.getItem('na_session_id') || '';
     if (!sid) {
       sid =
@@ -73,7 +87,12 @@ function msSinceStart(): number {
   try {
     let start = parseInt(store?.getItem('na_session_start') || '0', 10);
     if (!start) {
-      start = Date.now();
+      // Continue the timeline started on the hairstyles captcha (na_t0) if present.
+      const t0 =
+        typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('na_t0')
+          : null;
+      start = (t0 && parseInt(t0, 10)) || Date.now();
       store?.setItem('na_session_start', String(start));
     }
     return Date.now() - start;
