@@ -9,6 +9,13 @@ interface AdSenseProps {
   format?: string;
   fullWidthResponsive?: boolean;
   style?: React.CSSProperties;
+  /**
+   * Fixed pixel size. When BOTH width and height are set, the unit renders as a
+   * fixed-size ad (e.g. 300×250) instead of responsive: `data-ad-format` and
+   * `data-full-width-responsive` are dropped and the inline style locks the size.
+   */
+  width?: number;
+  height?: number;
 }
 
 export default function AdSense({
@@ -17,10 +24,14 @@ export default function AdSense({
   format = 'auto',
   fullWidthResponsive = true,
   style,
+  width,
+  height,
 }: AdSenseProps) {
   const pathname = usePathname();
   const insRef = useRef<HTMLModElement | null>(null);
   const lastPath = useRef<string>('');
+
+  const fixed = typeof width === 'number' && typeof height === 'number';
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -47,11 +58,17 @@ export default function AdSense({
         key={`${pathname}-${slot}`}
         ref={insRef}
         className="adsbygoogle"
-        style={{ display: 'block', ...style }}
+        style={
+          fixed
+            ? { display: 'inline-block', width, height, ...style }
+            : { display: 'block', ...style }
+        }
         data-ad-client="ca-pub-1088654265590051"
         data-ad-slot={slot}
-        data-ad-format={format}
-        data-full-width-responsive={fullWidthResponsive ? 'true' : 'false'}
+        data-ad-format={fixed ? undefined : format}
+        data-full-width-responsive={
+          fixed ? undefined : fullWidthResponsive ? 'true' : 'false'
+        }
       />
     </div>
   );

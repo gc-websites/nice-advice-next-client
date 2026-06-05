@@ -70,9 +70,9 @@ export default function TrackedAdSlot({
       </span>
       <AdSense
         slot={slot}
-        format="auto"
+        width={300}
+        height={250}
         className="w-full text-center"
-        style={{ display: 'block', minHeight: 250, width: '100%' }}
       />
     </div>
   );
