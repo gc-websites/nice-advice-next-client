@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Metadata } from 'next';
-import AdSense from '@/components/AdSense';
+import TrackedAdSlot from '@/components/TrackedAdSlot';
+import EngagementTracker from '@/components/EngagementTracker';
 import ClickTracker from '@/components/ClickTracker';
 import TrackedCTALink from '@/components/TrackedCTALink';
 
@@ -46,9 +47,12 @@ export default function DigitalMarketingOfferPage() {
       {/* fire prelend_view + persist utm params */}
       <ClickTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} eventType="prelend_view" />
 
+      {/* scroll depth + time on page → page_exit */}
+      <EngagementTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} />
+
       {/* Top banner ad — na_o_top */}
       <div className="max-w-[1100px] mx-auto px-4 mb-8">
-        <AdSlot slot="9081217047" />
+        <TrackedAdSlot slot="9081217047" locale={LOCALE} prelendSlug={PRELEND_SLUG} />
       </div>
 
       <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -86,7 +90,7 @@ export default function DigitalMarketingOfferPage() {
                 </p>
 
                 {/* Ad — na_o_mid1 (after the first paragraph) */}
-                <AdSlot slot="8220091745" />
+                <TrackedAdSlot slot="8220091745" locale={LOCALE} prelendSlug={PRELEND_SLUG} />
 
                 <p>
                   We break down the format, what you study, tuition and aid, the real pros and cons, and the exact
@@ -100,7 +104,7 @@ export default function DigitalMarketingOfferPage() {
               </div>
 
               {/* Ad — na_o_mid2 (after the intro block) */}
-              <AdSlot slot="3800970206" />
+              <TrackedAdSlot slot="3800970206" locale={LOCALE} prelendSlug={PRELEND_SLUG} />
 
               <Section id="format" title="Format & how online learning works">
                 <p>
@@ -381,17 +385,6 @@ function Section({ id, title, children }: { id: string; title: string; children:
       </h2>
       {children}
     </section>
-  );
-}
-
-function AdSlot({ slot }: { slot: string }) {
-  return (
-    <div className="w-full flex flex-col items-center mb-8 group has-[ins[data-ad-status='unfilled']]:hidden has-[ins[style*='display: none']]:hidden">
-      <span className="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wider mb-2 text-center hidden group-has-[ins:not(:empty)]:block">
-        Advertisement
-      </span>
-      <AdSense slot={slot} format="auto" className="w-full text-center" style={{ display: 'block', minHeight: 250, width: '100%' }} />
-    </div>
   );
 }
 

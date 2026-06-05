@@ -1,15 +1,33 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { trackEvent } from './track';
 
 /**
  * Full-screen "human check" gate shown as soon as the page opens.
  * Blocks the whole screen with a dimmed, blurred overlay and a small centered
  * card with a single confirm button. Styled to match the landing (teal brand,
  * Merriweather heading, rounded card). Dismisses on click and unlocks scroll.
+ *
+ * Tracks `captcha_shown` (on open) and `captcha_passed` (on confirm) so the
+ * funnel journey records the gate step.
  */
-export default function RobotGate() {
+export default function RobotGate({
+  locale,
+  prelendSlug,
+}: {
+  locale: 'en' | 'fr' | 'es';
+  prelendSlug: string;
+}) {
   const [open, setOpen] = useState(true);
+  const shownTracked = useRef(false);
+
+  // Fire captcha_shown once when the gate appears.
+  useEffect(() => {
+    if (shownTracked.current) return;
+    shownTracked.current = true;
+    trackEvent('captcha_shown', { locale, prelendSlug });
+  }, [locale, prelendSlug]);
 
   // Lock page scroll while the gate is open.
   useEffect(() => {
@@ -27,6 +45,11 @@ export default function RobotGate() {
   }, [open]);
 
   if (!open) return null;
+
+  const handlePass = () => {
+    trackEvent('captcha_passed', { locale, prelendSlug });
+    setOpen(false);
+  };
 
   return (
     <div
@@ -52,7 +75,7 @@ export default function RobotGate() {
 
         <button
           type="button"
-          onClick={() => setOpen(false)}
+          onClick={handlePass}
           className="group/btn relative isolate flex w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-xl bg-gradient-to-br from-main to-main3 px-6 py-4 text-base font-bold uppercase tracking-wide text-white shadow-[0_12px_28px_-10px_rgba(3,145,133,0.55)] transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_22px_48px_-12px_rgba(3,145,133,0.75)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-main/40 active:translate-y-0 active:scale-100 sm:text-lg"
         >
           {/* gradient cross-fade on hover */}

@@ -1,9 +1,11 @@
 import Image from 'next/image';
 import { Metadata } from 'next';
-import AdSense from '@/components/AdSense';
+import TrackedAdSlot from '@/components/TrackedAdSlot';
+import EngagementTracker from '@/components/EngagementTracker';
 import ClickTracker from '@/components/ClickTracker';
 import TrackedCTALink from '@/components/TrackedCTALink';
 import RobotGate from '@/components/RobotGate';
+import CampaignPixel from '@/components/CampaignPixel';
 
 // ---------------------------------------------------------------------------
 // CTA destination — the offer (review) page. Incoming ?utm_* params are
@@ -26,11 +28,17 @@ export const metadata: Metadata = {
 export default function DigitalMarketingPrelandPage() {
   return (
     <div className="bg-light dark:bg-mainText min-h-screen py-8 sm:py-12">
-      {/* human-check gate shown on open */}
-      <RobotGate />
+      {/* TikTok campaign pixel — loads the pixel + fires the conversion on the CTA click */}
+      <CampaignPixel />
 
       {/* fire prelend_view + persist utm params */}
       <ClickTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} />
+
+      {/* scroll depth + time on page → page_exit */}
+      <EngagementTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} />
+
+      {/* human-check gate (captcha) shown on open */}
+      <RobotGate locale={LOCALE} prelendSlug={PRELEND_SLUG} />
 
       <main className="w-full max-w-[830px] mx-auto bg-white dark:bg-additionalText rounded-xl shadow-sm overflow-hidden text-gray-800 dark:text-white p-6 sm:p-10 border border-[#eaeaea] dark:border-white/10">
         <article>
@@ -46,7 +54,7 @@ export default function DigitalMarketingPrelandPage() {
           </header>
 
           {/* Top ad — na_v_top */}
-          <AdSlot slot="4020462057" />
+          <TrackedAdSlot slot="4020462057" locale={LOCALE} prelendSlug={PRELEND_SLUG} />
 
           <figure className="mb-8">
             <Image
@@ -207,22 +215,6 @@ export default function DigitalMarketingPrelandPage() {
 // --------------------------------------------------------------------------
 // Subcomponents
 // --------------------------------------------------------------------------
-
-function AdSlot({ slot }: { slot: string }) {
-  return (
-    <div className="w-full flex flex-col items-center mb-8 group has-[ins[data-ad-status='unfilled']]:hidden has-[ins[style*='display: none']]:hidden">
-      <span className="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wider mb-2 text-center hidden group-has-[ins:not(:empty)]:block">
-        Advertisement
-      </span>
-      <AdSense
-        slot={slot}
-        format="auto"
-        className="w-full text-center"
-        style={{ display: 'block', minHeight: 250, width: '100%' }}
-      />
-    </div>
-  );
-}
 
 function FeatureItem({
   icon,

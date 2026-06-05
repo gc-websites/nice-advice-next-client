@@ -132,6 +132,11 @@ export default async function RootLayout({
                 var urlFire = params.get('fire');
                 var urlPixelMode = params.get('pixel_mode');
 
+                // Only run the Facebook pixel for Facebook campaigns.
+                // (TikTok campaigns pass platform=tiktok and are handled by CampaignPixel.)
+                var urlPlatform = (params.get('platform') || '').toLowerCase();
+                if (urlPlatform && urlPlatform !== 'facebook') return;
+
                 var finalPixelId = urlPixel || sessionStorage.getItem('na_fb_pixel');
 
                 if (urlPixel) {
