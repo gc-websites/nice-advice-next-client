@@ -71,7 +71,7 @@ export default function DigitalMarketingOfferPage() {
 
               <figure className="mb-8">
                 <Image
-                  src="/assets/img/d26c2aae-dcfe-425e-b25b-baebd8dca307.png"
+                  src="/assets/img/escouu.png"
                   alt="Título en marketing digital en línea: tu guía para dominar el marketing digital"
                   width={1774}
                   height={887}
