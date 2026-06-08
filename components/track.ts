@@ -122,7 +122,7 @@ export function getTrackingParams(): Record<string, string | undefined> {
   if (typeof window === 'undefined') return {};
   const params = new URLSearchParams(window.location.search);
   const keys = [
-    'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_campaign_name', 'utm_term', 'utm_content',
     'platform', 'gclid', 'fbclid', 'pixel', 'event', 'pixel_mode', 'fire',
   ];
   const tracking: Record<string, string | undefined> = {};

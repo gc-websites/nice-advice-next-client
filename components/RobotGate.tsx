@@ -3,6 +3,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { trackEvent } from './track';
 
+// Localized copy for the gate (falls back to English for unlisted locales).
+const STRINGS: Record<string, { title: string; subtitle: string; button: string }> = {
+  en: {
+    title: 'Quick security check',
+    subtitle: "Please confirm you're human to continue.",
+    button: "I'm not a robot",
+  },
+  es: {
+    title: 'Verificación de seguridad rápida',
+    subtitle: 'Confirma que eres humano para continuar.',
+    button: 'No soy un robot',
+  },
+};
+
 /**
  * Full-screen "human check" gate shown as soon as the page opens.
  * Blocks the whole screen with a dimmed, blurred overlay and a small centered
@@ -51,6 +65,8 @@ export default function RobotGate({
     setOpen(false);
   };
 
+  const t = STRINGS[locale] ?? STRINGS.en;
+
   return (
     <div
       role="dialog"
@@ -67,10 +83,10 @@ export default function RobotGate({
           id="robot-gate-title"
           className="mb-2 font-merriweather text-xl font-bold text-mainText dark:text-white sm:text-2xl"
         >
-          Quick security check
+          {t.title}
         </h2>
         <p className="mb-6 text-[15px] leading-relaxed text-additionalText dark:text-white/70">
-          Please confirm you&apos;re human to continue.
+          {t.subtitle}
         </p>
 
         <button
@@ -90,7 +106,7 @@ export default function RobotGate({
           />
           <span className="relative z-10 inline-flex items-center gap-2.5">
             <CheckIcon />
-            I&apos;m not a robot
+            {t.button}
           </span>
         </button>
       </div>

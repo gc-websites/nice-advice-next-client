@@ -66,7 +66,7 @@ export default function TrackedAdSlot({
       className="w-full flex flex-col items-center mb-8 group has-[ins[data-ad-status='unfilled']]:hidden has-[ins[style*='display: none']]:hidden"
     >
       <span className="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wider mb-2 text-center hidden group-has-[ins:not(:empty)]:block">
-        Advertisement
+        {locale === 'es' ? 'Publicidad' : 'Advertisement'}
       </span>
       <AdSense
         slot={slot}

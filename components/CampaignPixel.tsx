@@ -14,7 +14,7 @@ import { getTtclid } from './ttConversion';
  * "ad viewed" conversion instead of firing on the CTA click.
  *
  * Campaign URL contract (only tt_pixel is required):
- *   ?platform=tiktok&tt_pixel=Cxxxxxxxxx&tt_event=CompletePayment&tt_content_id=digital-marketing
+ *   ?platform=tiktok&tt_pixel=Cxxxxxxxxx&tt_event=Purchase&tt_content_id=digital-marketing
  */
 
 declare global {

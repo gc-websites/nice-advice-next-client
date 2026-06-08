@@ -81,7 +81,7 @@ export function getTtConversion(): Record<string, string> | null {
 
   const out: Record<string, string> = {
     tt_pixel: pixel,
-    tt_event: get('na_tt_event') || 'CompletePayment',
+    tt_event: get('na_tt_event') || 'Purchase',
     tt_event_id: getOrCreateTtEventId(),
   };
   const ttclid = getTtclid();
