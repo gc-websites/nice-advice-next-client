@@ -33,6 +33,7 @@ export default function EngagementTracker({
       trackEvent('page_exit', {
         locale,
         prelendSlug,
+        funnelStep: 'page_exit',
         extra: { scroll_depth: maxScroll, time_on_page: Date.now() - start },
       });
     };

@@ -44,8 +44,8 @@ const SECTIONS = [
 export default function DigitalMarketingOfferPage() {
   return (
     <div className="bg-light dark:bg-mainText min-h-screen py-8 sm:py-12">
-      {/* fire prelend_view + persist utm params */}
-      <ClickTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} eventType="prelend_view" />
+      {/* fire offer_view + persist utm params */}
+      <ClickTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} eventType="prelend_view" funnelStep="offer_view" />
 
       {/* scroll depth + time on page → page_exit */}
       <EngagementTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} />

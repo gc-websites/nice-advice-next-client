@@ -28,11 +28,12 @@ export const metadata: Metadata = {
 export default function DigitalMarketingPrelandPage() {
   return (
     <div className="bg-light dark:bg-mainText min-h-screen py-8 sm:py-12">
-      {/* TikTok campaign pixel — loads the pixel + fires the conversion on the CTA click */}
+      {/* TikTok campaign pixel — loads the pixel (defaults it for tiktok sessions); the
+          conversion fires on the first filled ad view (see TrackedAdSlot) */}
       <CampaignPixel />
 
-      {/* fire prelend_view + persist utm params */}
-      <ClickTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} />
+      {/* fire prelander_view + persist utm params */}
+      <ClickTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} funnelStep="prelander_view" />
 
       {/* scroll depth + time on page → page_exit */}
       <EngagementTracker locale={LOCALE} prelendSlug={PRELEND_SLUG} />

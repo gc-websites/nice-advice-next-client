@@ -7,20 +7,22 @@ interface ClickTrackerProps {
   locale: 'en' | 'fr' | 'es';
   prelendSlug: string;
   eventType?: TrackEventType;
+  /** Precise funnel step, e.g. 'prelander_view' on /v/, 'offer_view' on /o/. */
+  funnelStep?: string;
 }
 
 /**
  * Fires the page-view step of the funnel (default `prelend_view`) once on mount,
  * persisting UTM/attribution params for the rest of the journey.
  */
-export default function ClickTracker({ locale, prelendSlug, eventType = 'prelend_view' }: ClickTrackerProps) {
+export default function ClickTracker({ locale, prelendSlug, eventType = 'prelend_view', funnelStep }: ClickTrackerProps) {
   const hasFired = useRef(false);
 
   useEffect(() => {
     if (hasFired.current) return;
     hasFired.current = true;
-    trackEvent(eventType, { locale, prelendSlug });
-  }, [locale, prelendSlug, eventType]);
+    trackEvent(eventType, { locale, prelendSlug, funnelStep });
+  }, [locale, prelendSlug, eventType, funnelStep]);
 
   return null;
 }
@@ -44,7 +46,8 @@ export function useTrackClick(locale: 'en' | 'fr' | 'es', prelendSlug: string) {
         }
       }
 
-      trackEvent(eventType, { locale, prelendSlug, destinationUrl });
+      // funnel_step matches the event name here ('cta_click' / 'outbound_click').
+      trackEvent(eventType, { locale, prelendSlug, destinationUrl, funnelStep: eventType });
     },
     [locale, prelendSlug]
   );

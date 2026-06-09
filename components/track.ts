@@ -9,6 +9,7 @@
 // full user path can be reconstructed by session_id + sequence/ms_since_start.
 
 import { sendGTMEvent } from '@next/third-parties/google';
+import { getTtclid } from './ttConversion';
 
 const TRACKING_API = 'https://api.nice-advice.info/track-click';
 
@@ -25,6 +26,12 @@ export interface TrackOpts {
   locale: 'en' | 'fr' | 'es';
   prelendSlug: string;
   destinationUrl?: string;
+  /**
+   * Precise funnel step (source of truth), e.g. 'captcha2_shown', 'prelander_view',
+   * 'offer_view'. event_type stays a coarse/legacy bucket; funnel_step disambiguates
+   * the two captchas and the two landers. The server backfills it when omitted.
+   */
+  funnelStep?: string;
   meta?: Record<string, unknown>;
   /** extra top-level fields (e.g. scroll_depth, time_on_page) */
   extra?: Record<string, unknown>;
@@ -177,8 +184,12 @@ export function trackEvent(eventType: TrackEventType, opts: TrackOpts) {
   const data: Record<string, unknown> = {
     session_id: getSessionId(),
     event_type: eventType,
+    funnel_step: opts.funnelStep,
     prelend_slug: opts.prelendSlug,
     locale: opts.locale,
+    // ui_locale = the funnel UI language. Strapi strips the reserved `locale` key,
+    // so the value lands here; `locale` is kept only for backward compatibility.
+    ui_locale: opts.locale,
     source_url: window.location.pathname,
     page_url: window.location.href,
     landing_url: getLandingUrl(),
@@ -190,6 +201,11 @@ export function trackEvent(eventType: TrackEventType, opts: TrackOpts) {
     ms_since_start: msSinceStart(),
     clicked_at: new Date().toISOString(),
     ...getTrackingParams(),
+    // ttclid rides EVERY event (getTrackingParams omits it). TikTok appends it to the
+    // landing URL; without this it's discarded and attribution breaks. NOTE: do NOT add
+    // tt_event_id here — the server forwards a conversion whenever tt_event_id is present,
+    // so it must ride ONLY the conversion event (see ttConversion.fireTikTokConversionOnce).
+    ttclid: getTtclid() || undefined,
     ...(opts.extra || {}),
   };
   if (opts.meta) data.meta = opts.meta;

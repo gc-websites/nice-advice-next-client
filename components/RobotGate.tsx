@@ -40,7 +40,9 @@ export default function RobotGate({
   useEffect(() => {
     if (shownTracked.current) return;
     shownTracked.current = true;
-    trackEvent('captcha_shown', { locale, prelendSlug });
+    // funnel_step captcha2_* — this is the SECOND gate (RobotGate on /v/); the first
+    // gate is the standalone captcha on the entry domain (captcha1_*).
+    trackEvent('captcha_shown', { locale, prelendSlug, funnelStep: 'captcha2_shown' });
   }, [locale, prelendSlug]);
 
   // Lock page scroll while the gate is open.
@@ -61,7 +63,7 @@ export default function RobotGate({
   if (!open) return null;
 
   const handlePass = () => {
-    trackEvent('captcha_passed', { locale, prelendSlug });
+    trackEvent('captcha_passed', { locale, prelendSlug, funnelStep: 'captcha2_passed' });
     setOpen(false);
   };
 

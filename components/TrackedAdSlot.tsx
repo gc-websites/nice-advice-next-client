@@ -39,14 +39,16 @@ export default function TrackedAdSlot({
             const ins = el.querySelector('ins.adsbygoogle');
             const status = ins?.getAttribute('data-ad-status') || '';
 
-            // On the conversion ad, fire the TikTok conversion on view — unless the
+            // Fire the once-per-session TikTok conversion on the FIRST FILLED ad block
+            // that scrolls into view (>=50%) — ANY slot, not just the top one — so the
+            // conversion isn't lost when the top unit doesn't fill. Skipped only when the
             // unit explicitly returned no ad. Returns the fields the server forwards.
-            const tt =
-              conversion && status !== 'unfilled' ? fireTikTokConversionOnce() : null;
+            const tt = status !== 'unfilled' ? fireTikTokConversionOnce() : null;
 
             trackEvent('ad_view', {
               locale,
               prelendSlug,
+              funnelStep: 'ad_view',
               meta: { slot, ad_status: status, conversion: conversion || undefined },
               extra: tt || undefined,
             });

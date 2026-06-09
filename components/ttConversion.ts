@@ -8,6 +8,10 @@
 const KEY_EVENT_ID = 'na_tt_event_id';
 const KEY_TTCLID = 'na_ttclid';
 
+// Default pixel for the digital-marketing funnel. Used when the ad URL omits
+// ?tt_pixel but the visit is a TikTok session, so the conversion still has a pixel.
+export const DEFAULT_TT_PIXEL = 'CGUJ36RC77U0HA6062A0';
+
 function ss(): Storage | null {
   try {
     return typeof window !== 'undefined' ? window.sessionStorage : null;
@@ -76,7 +80,12 @@ export function getTtConversion(): Record<string, string> | null {
     }
   };
 
-  const pixel = get('na_tt_pixel');
+  let pixel = get('na_tt_pixel');
+  if (!pixel && get('na_platform') === 'tiktok') {
+    // TikTok session whose ad URL omitted ?tt_pixel — fall back to the funnel pixel
+    // so the conversion isn't silently dropped. (CampaignPixel also defaults it.)
+    pixel = DEFAULT_TT_PIXEL;
+  }
   if (!pixel) return null;
 
   const out: Record<string, string> = {

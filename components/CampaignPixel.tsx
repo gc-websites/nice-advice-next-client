@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { getTtclid } from './ttConversion';
+import { getTtclid, DEFAULT_TT_PIXEL } from './ttConversion';
 
 /**
  * Campaign pixel — TikTok.
@@ -49,7 +49,17 @@ export default function CampaignPixel() {
       }
     };
 
-    const pixel = get('tt_pixel', 'na_tt_pixel');
+    let pixel = get('tt_pixel', 'na_tt_pixel');
+    if (!pixel && params.get('platform') === 'tiktok') {
+      // TikTok ad URL without ?tt_pixel → default the funnel pixel so the conversion
+      // (fired later on the first ad view) still has a pixel to report to.
+      pixel = DEFAULT_TT_PIXEL;
+      try {
+        sessionStorage.setItem('na_tt_pixel', pixel);
+      } catch {
+        /* ignore */
+      }
+    }
     if (!pixel) return; // not a TikTok campaign → nothing to do
 
     // Persist the rest so fireTikTokConversionOnce() can build the event later.
