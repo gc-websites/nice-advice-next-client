@@ -79,6 +79,7 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <meta name="google-adsense-account" content="ca-pub-1088654265590051" />
+        <meta name="facebook-domain-verification" content="se573i8d091zrjvakedb9iqi7s92el" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
