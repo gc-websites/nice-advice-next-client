@@ -126,6 +126,12 @@ export default async function RootLayout({
           __html: `
             (function() {
               try {
+                // Funnel pages (/v/, /o/) are owned by CampaignPixel, which loads the
+                // pixel and fires the conversion WITH an eventID (deduped against the
+                // server-side Conversions API). This legacy script fires events without
+                // an eventID, so letting it run there would double-count conversions.
+                if (/^\\/(en|es|fr)\\/(v|o)\\//.test(window.location.pathname)) return;
+
                 var params = new URLSearchParams(window.location.search);
                 var urlPixel = params.get('pixel');
                 var urlEvent = params.get('event');

@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import AdSense from './AdSense';
 import { trackEvent } from './track';
 import { fireTikTokConversionOnce } from './ttConversion';
+import { fireFacebookConversionOnce } from './fbConversion';
 
 /**
  * Funnel ad slot: renders an AdSense unit (with label + auto-hide when unfilled)
@@ -43,18 +44,21 @@ export default function TrackedAdSlot({
             const ins = el.querySelector('ins.adsbygoogle');
             const status = ins?.getAttribute('data-ad-status') || '';
 
-            // Fire the once-per-session TikTok conversion on the FIRST FILLED ad block
-            // that scrolls into view (>=50%) — ANY slot, not just the top one — so the
-            // conversion isn't lost when the top unit doesn't fill. Skipped only when the
-            // unit explicitly returned no ad. Returns the fields the server forwards.
+            // Fire the once-per-session conversion on the FIRST FILLED ad block that
+            // scrolls into view (>=50%) — ANY slot, not just the top one — so the
+            // conversion isn't lost when the top unit doesn't fill. Each platform
+            // helper no-ops unless this session belongs to it (tt_* vs fb_* params),
+            // so at most one of them returns fields for the server to forward.
             const tt = status !== 'unfilled' ? fireTikTokConversionOnce() : null;
+            const fb = status !== 'unfilled' ? fireFacebookConversionOnce() : null;
+            const extra = tt || fb ? { ...(tt || {}), ...(fb || {}) } : undefined;
 
             trackEvent('ad_view', {
               locale,
               prelendSlug,
               funnelStep,
               meta: { slot, ad_status: status, conversion: conversion || undefined },
-              extra: tt || undefined,
+              extra,
             });
             io.disconnect();
           }

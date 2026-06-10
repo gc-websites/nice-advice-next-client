@@ -131,6 +131,12 @@ export function getTrackingParams(): Record<string, string | undefined> {
   const keys = [
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_campaign_name', 'utm_term', 'utm_content',
     'platform', 'gclid', 'fbclid', 'pixel', 'event', 'pixel_mode', 'fire',
+    // canonical Meta funnel params (mirror tt_pixel/tt_event); they share the same
+    // na_fb_* storage as the legacy ?pixel=/?event= contract above, and win when both
+    // are present (later keys overwrite). NOTE: do NOT add fb_event_id here — the
+    // server forwards a CAPI conversion whenever fb_event_id is present, so it must
+    // ride ONLY the conversion event (see fbConversion.fireFacebookConversionOnce).
+    'fb_pixel', 'fb_event',
   ];
   const tracking: Record<string, string | undefined> = {};
 
