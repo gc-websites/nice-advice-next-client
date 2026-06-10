@@ -55,7 +55,7 @@ export default function DigitalMarketingPrelandPage() {
           </header>
 
           {/* Top ad — na_v_top — fires the TikTok conversion on first view */}
-          <TrackedAdSlot slot="4020462057" locale={LOCALE} prelendSlug={PRELEND_SLUG} conversion />
+          <TrackedAdSlot slot="4020462057" locale={LOCALE} prelendSlug={PRELEND_SLUG} conversion funnelStep="ad_view_v_top" />
 
           <figure className="mb-8">
             <Image

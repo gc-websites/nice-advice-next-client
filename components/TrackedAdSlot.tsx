@@ -18,11 +18,15 @@ export default function TrackedAdSlot({
   locale,
   prelendSlug,
   conversion = false,
+  funnelStep = 'ad_view',
 }: {
   slot: string;
   locale: 'en' | 'fr' | 'es';
   prelendSlug: string;
   conversion?: boolean;
+  /** Per-slot funnel step (ad_view_v_top, ad_view_o_top, ad_view_o_mid1, ad_view_o_mid2)
+   *  so every ad block is its own row in the funnel report. event_type stays 'ad_view'. */
+  funnelStep?: string;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const fired = useRef(false);
@@ -48,7 +52,7 @@ export default function TrackedAdSlot({
             trackEvent('ad_view', {
               locale,
               prelendSlug,
-              funnelStep: 'ad_view',
+              funnelStep,
               meta: { slot, ad_status: status, conversion: conversion || undefined },
               extra: tt || undefined,
             });
@@ -60,7 +64,7 @@ export default function TrackedAdSlot({
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [slot, locale, prelendSlug, conversion]);
+  }, [slot, locale, prelendSlug, conversion, funnelStep]);
 
   return (
     <div
