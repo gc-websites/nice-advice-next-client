@@ -9,9 +9,8 @@ const KEY_EVENT_ID = 'na_fb_event_id';
 const KEY_CONVERTED = 'na_fb_converted';
 
 // Default pixel for the digital-marketing funnel. Used when the ad URL omits
-// ?fb_pixel but the visit is a Facebook session, so the conversion still has a
-// pixel. Empty until the funnel's Meta pixel id is issued — set it here once known.
-export const DEFAULT_FB_PIXEL = '';
+// ?fb_pixel but the visit is a Facebook session, so the conversion still has a pixel.
+export const DEFAULT_FB_PIXEL = '1417082162390960';
 
 function ss(): Storage | null {
   try {
