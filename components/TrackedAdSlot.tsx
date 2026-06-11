@@ -6,13 +6,21 @@ import { trackEvent } from './track';
 import { fireTikTokConversionOnce } from './ttConversion';
 import { fireFacebookConversionOnce } from './fbConversion';
 
+// How long after visibility we wait for AdSense to resolve data-ad-status
+// before logging the view as 'unresolved' (prefetched/suspended webviews and
+// blocked AdSense never resolve at all).
+const AD_STATUS_TIMEOUT_MS = 8000;
+
 /**
  * Funnel ad slot: renders an AdSense unit (with label + auto-hide when unfilled)
- * and fires a single `ad_view` event when the unit scrolls into view.
+ * and fires a single `ad_view` event when the unit scrolls into view AND
+ * AdSense has resolved its fill status.
  *
- * When `conversion` is set (the prelander's top ad), the first view ALSO fires
- * the TikTok conversion (browser + server, deduped) — mirroring the competitor's
- * "ad viewed" conversion. Used only on funnel pages, not site-wide.
+ * The once-per-session conversion (TikTok/Meta, browser + server, deduped)
+ * fires ONLY when the slot resolves to data-ad-status="filled". Empty/never-
+ * resolving statuses ('' — prefetch phantoms, suspended webviews, blocked ads)
+ * are logged as ad_status:'unresolved' and are NOT conversion-eligible, so the
+ * pixels never get trained on non-views. Used only on funnel pages.
  */
 export default function TrackedAdSlot({
   slot,
@@ -36,38 +44,98 @@ export default function TrackedAdSlot({
     const el = ref.current;
     if (!el || typeof IntersectionObserver === 'undefined') return;
 
+    let mo: MutationObserver | null = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const readStatus = (): string =>
+      el.querySelector('ins.adsbygoogle')?.getAttribute('data-ad-status') || '';
+
+    // If the user leaves while we're still waiting for AdSense, flush the
+    // ad_view immediately (sendBeacon survives pagehide) so quick bounces
+    // are not lost from the funnel.
+    const flushOnLeave = () => {
+      const s = readStatus();
+      finish(s === 'filled' || s === 'unfilled' ? s : 'unresolved');
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') flushOnLeave();
+    };
+    const removeLeaveListeners = () => {
+      window.removeEventListener('pagehide', flushOnLeave);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+
+    // Logs the single ad_view and fires the conversion — exactly once.
+    const finish = (status: 'filled' | 'unfilled' | 'unresolved') => {
+      if (fired.current) return;
+      fired.current = true;
+      mo?.disconnect();
+      if (timer) clearTimeout(timer);
+      removeLeaveListeners();
+
+      // Conversion ONLY on a genuinely filled, >=50%-visible unit. Each platform
+      // helper no-ops unless this session belongs to it (tt_* vs fb_* params),
+      // so at most one of them returns fields for the server to forward.
+      const tt = status === 'filled' ? fireTikTokConversionOnce() : null;
+      const fb = status === 'filled' ? fireFacebookConversionOnce() : null;
+      const extra = tt || fb ? { ...(tt || {}), ...(fb || {}) } : undefined;
+
+      trackEvent('ad_view', {
+        locale,
+        prelendSlug,
+        funnelStep,
+        meta: { slot, ad_status: status, conversion: conversion || undefined },
+        extra,
+      });
+    };
+
+    // Phase 2 (after visibility): wait for AdSense to resolve the fill status.
+    const awaitStatus = () => {
+      const now = readStatus();
+      if (now === 'filled' || now === 'unfilled') {
+        finish(now);
+        return;
+      }
+      window.addEventListener('pagehide', flushOnLeave);
+      document.addEventListener('visibilitychange', onVisibilityChange);
+      // Watch the whole subtree: covers both the <ins> getting the attribute
+      // later AND the <ins> not existing yet at visibility time.
+      if (typeof MutationObserver !== 'undefined') {
+        mo = new MutationObserver(() => {
+          const s = readStatus();
+          if (s === 'filled' || s === 'unfilled') finish(s);
+        });
+        mo.observe(el, {
+          subtree: true,
+          childList: true,
+          attributes: true,
+          attributeFilter: ['data-ad-status'],
+        });
+      }
+      timer = setTimeout(() => {
+        const s = readStatus();
+        finish(s === 'filled' || s === 'unfilled' ? s : 'unresolved');
+      }, AD_STATUS_TIMEOUT_MS);
+    };
+
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting && !fired.current) {
-            fired.current = true;
-            const ins = el.querySelector('ins.adsbygoogle');
-            const status = ins?.getAttribute('data-ad-status') || '';
-
-            // Fire the once-per-session conversion on the FIRST FILLED ad block that
-            // scrolls into view (>=50%) — ANY slot, not just the top one — so the
-            // conversion isn't lost when the top unit doesn't fill. Each platform
-            // helper no-ops unless this session belongs to it (tt_* vs fb_* params),
-            // so at most one of them returns fields for the server to forward.
-            const tt = status !== 'unfilled' ? fireTikTokConversionOnce() : null;
-            const fb = status !== 'unfilled' ? fireFacebookConversionOnce() : null;
-            const extra = tt || fb ? { ...(tt || {}), ...(fb || {}) } : undefined;
-
-            trackEvent('ad_view', {
-              locale,
-              prelendSlug,
-              funnelStep,
-              meta: { slot, ad_status: status, conversion: conversion || undefined },
-              extra,
-            });
             io.disconnect();
+            awaitStatus();
           }
         }
       },
       { threshold: 0.5 }
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      mo?.disconnect();
+      if (timer) clearTimeout(timer);
+      removeLeaveListeners();
+    };
   }, [slot, locale, prelendSlug, conversion, funnelStep]);
 
   return (

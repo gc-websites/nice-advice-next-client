@@ -5,6 +5,8 @@
 // deduplicates the browser event and the server event when both carry the same
 // event name + event id + pixel.
 
+import { isRealClickId } from './clickId';
+
 const KEY_EVENT_ID = 'na_fb_event_id';
 const KEY_CONVERTED = 'na_fb_converted';
 
@@ -50,13 +52,18 @@ export function getOrCreateFbEventId(): string {
   return id;
 }
 
-/** Capture fbclid from the URL once, persist it for the session, return it. */
+/**
+ * Capture fbclid from the URL once, persist it for the session, return it.
+ * Garbage values (literal {{macros}} / "fbclid" echoes from FB scanners) are
+ * never persisted or returned — a fake fbclid would poison the server-built
+ * fbc and tank match quality.
+ */
 export function getFbclid(): string {
   const store = ss();
   try {
     if (typeof window !== 'undefined') {
       const fromUrl = new URLSearchParams(window.location.search).get('fbclid');
-      if (fromUrl) {
+      if (isRealClickId(fromUrl)) {
         try {
           store?.setItem('na_fbclid', fromUrl);
         } catch {
@@ -69,7 +76,17 @@ export function getFbclid(): string {
     /* ignore */
   }
   try {
-    return store?.getItem('na_fbclid') || '';
+    const stored = store?.getItem('na_fbclid') || '';
+    if (stored && !isRealClickId(stored)) {
+      // purge garbage persisted by older builds
+      try {
+        store?.removeItem('na_fbclid');
+      } catch {
+        /* ignore */
+      }
+      return '';
+    }
+    return stored;
   } catch {
     return '';
   }

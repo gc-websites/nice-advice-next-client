@@ -5,6 +5,8 @@
 // posts to /track-click). TikTok deduplicates the browser event and the server
 // Events API event when both carry the same event name + event_id.
 
+import { isRealClickId } from './clickId';
+
 const KEY_EVENT_ID = 'na_tt_event_id';
 const KEY_TTCLID = 'na_ttclid';
 
@@ -40,13 +42,18 @@ export function getOrCreateTtEventId(): string {
   return id;
 }
 
-/** Capture ttclid from the URL once, persist it for the session, return it. */
+/**
+ * Capture ttclid from the URL once, persist it for the session, return it.
+ * Garbage values (literal __CLICKID__ macros from previews/misconfigured ad
+ * URLs) are NEVER persisted or returned — a missing ttclid is recoverable via
+ * TikTok auto-append, a fake one actively breaks attribution.
+ */
 export function getTtclid(): string {
   const store = ss();
   try {
     if (typeof window !== 'undefined') {
       const fromUrl = new URLSearchParams(window.location.search).get('ttclid');
-      if (fromUrl) {
+      if (isRealClickId(fromUrl)) {
         try {
           store?.setItem(KEY_TTCLID, fromUrl);
         } catch {
@@ -59,7 +66,17 @@ export function getTtclid(): string {
     /* ignore */
   }
   try {
-    return store?.getItem(KEY_TTCLID) || '';
+    const stored = store?.getItem(KEY_TTCLID) || '';
+    if (stored && !isRealClickId(stored)) {
+      // purge garbage persisted by older builds
+      try {
+        store?.removeItem(KEY_TTCLID);
+      } catch {
+        /* ignore */
+      }
+      return '';
+    }
+    return stored;
   } catch {
     return '';
   }
