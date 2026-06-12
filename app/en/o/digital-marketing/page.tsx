@@ -52,7 +52,7 @@ export default function DigitalMarketingOfferPage() {
 
       {/* Top banner ad — na_o_top */}
       <div className="max-w-[1100px] mx-auto px-4 mb-8">
-        <TrackedAdSlot slot="9081217047" locale={LOCALE} prelendSlug={PRELEND_SLUG} funnelStep="ad_view_o_top" />
+        <TrackedAdSlot adUnit="na_o_top" locale={LOCALE} prelendSlug={PRELEND_SLUG} funnelStep="ad_view_o_top" />
       </div>
 
       <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,7 +90,7 @@ export default function DigitalMarketingOfferPage() {
                 </p>
 
                 {/* Ad — na_o_mid1 (after the first paragraph) */}
-                <TrackedAdSlot slot="8220091745" locale={LOCALE} prelendSlug={PRELEND_SLUG} funnelStep="ad_view_o_mid1" />
+                <TrackedAdSlot adUnit="na_o_mid1" locale={LOCALE} prelendSlug={PRELEND_SLUG} funnelStep="ad_view_o_mid1" />
 
                 <p>
                   We break down the format, what you study, tuition and aid, the real pros and cons, and the exact
@@ -104,7 +104,7 @@ export default function DigitalMarketingOfferPage() {
               </div>
 
               {/* Ad — na_o_mid2 (after the intro block) */}
-              <TrackedAdSlot slot="3800970206" locale={LOCALE} prelendSlug={PRELEND_SLUG} funnelStep="ad_view_o_mid2" />
+              <TrackedAdSlot adUnit="na_o_mid2" locale={LOCALE} prelendSlug={PRELEND_SLUG} funnelStep="ad_view_o_mid2" />
 
               <Section id="format" title="Format & how online learning works">
                 <p>
