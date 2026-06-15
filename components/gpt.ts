@@ -65,6 +65,23 @@ export function sourceValue(): string {
 }
 
 /**
+ * GAM `campaign` key-value from the persisted utm_campaign (= the ad platform's
+ * campaign id). Same constraints as sourceValue (<=40 chars, safe charset).
+ * Unsubstituted ad-template macros (e.g. "__CAMPAIGN_ID__") or param-name echoes
+ * are not a real campaign → 'none' (so revenue rolls into "(unattributed)").
+ */
+export function campaignValue(): string {
+  try {
+    const raw = (getTrackingParams().utm_campaign || '').trim();
+    if (!raw || /^__[a-z0-9_]+__$/i.test(raw) || raw.includes('{{') || raw.includes('}}')) return 'none';
+    const clean = raw.toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+    return clean || 'none';
+  } catch {
+    return 'none';
+  }
+}
+
+/**
  * Define + display one fixed-size funnel slot. Returns a cleanup that
  * destroys the slot — REQUIRED on unmount/route change or the next page's
  * defineSlot with the same div id fails.
@@ -89,6 +106,14 @@ export function showSlot(opts: {
     if (!slot) return; // div id already has a live slot (double-mount) — skip
     slot.addService(g.pubads());
     slot.setTargeting('source', sourceValue());
+    slot.setTargeting('campaign', campaignValue());
+    // PREDEFINED custom-dimension keys (src/cmp). The freeform source/campaign
+    // keys above do NOT surface on AdSense-backfill impressions in GAM reporting
+    // (confirmed: 0 key-value rows over real traffic); a PREDEFINED key set as a
+    // CUSTOM_DIMENSION is the path that breaks backfill revenue down per value.
+    // Same values; once this probe is confirmed the freeform keys get retired.
+    slot.setTargeting('src', sourceValue());
+    slot.setTargeting('cmp', campaignValue());
     listener = (event: any) => {
       if (event.slot === slot) opts.onRender(event.isEmpty ? 'unfilled' : 'filled');
     };
